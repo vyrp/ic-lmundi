@@ -17,7 +17,7 @@ app = webapp2.WSGIApplication([
     ('/turma/(\d+)?', classes.ClassHandler),
     ('/configuracoes', basic.SettingsHandler),
     ('/ajax/(emails|languages|modalities|payments)/(add|edit|remove)', ajax.AjaxHandler),
-], debug=True)
+], debug=False)
 
 app.registry["settings_lock"] = threading.Lock()
 
