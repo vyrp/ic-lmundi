@@ -4,9 +4,10 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>IC Linguae Mundi</title>
+    <title>{% block title %}{% endblock %} - Linguae Mundi</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <link rel="stylesheet" href="static/css/base.css" >
+    <link rel="stylesheet" href="/static/css/base.css" >
+    {% block css %}{% endblock %}
   </head>
 
   <body>
@@ -19,7 +20,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Instituto Intercultural Linguae Mundi</a>
+          <a class="navbar-brand" href="/home">Instituto Intercultural Linguae Mundi</a>
         </div>
         <div id="navbar" class="navbar-collapse collapse"></div>
       </div>
@@ -29,44 +30,20 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            <li class="active"><a href="#">Sumário</a></li>
-            <li><a href="#">Alunos</a></li>
-            <li><a href="#">Professores</a></li>
-            <li><a href="#">Turmas</a></li>
+            <li class="{% if active == 'home' %} active {% endif %}"><a href="/home">Sumário</a></li>
+            <li class="{% if active == 'alunos' %} active {% endif %}"><a href="/alunos">Alunos</a></li>
+            <li class="{% if active == 'professores' %} active {% endif %}"><a href="/professores">Professores</a></li>
+            <li class="{% if active == 'turmas' %} active {% endif %}"><a href="/turmas">Turmas</a></li>
           </ul>
           <hr>
           <ul class="nav nav-sidebar">
-            <li><a href="">Configurações</a></li>
+            <li class="{% if active == 'configuracoes' %} active {% endif %}"><a href="/configuracoes">Configurações</a></li>
           </ul>
+          <hr>
+          <p>Copyright © 2016 vyrp</p>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
-          <h1 class="page-header">Sumário</h1>
-
-          <div class="row placeholders">
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-            <div class="col-xs-6 col-sm-3 placeholder">
-              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAHd3dwAAACH5BAAAAAAALAAAAAABAAEAAAICRAEAOw==" width="200" height="200" class="img-responsive" alt="Generic placeholder thumbnail">
-              <h4>Label</h4>
-              <span class="text-muted">Something else</span>
-            </div>
-          </div>
-
-          <h2 class="sub-header">Histórico</h2>
-          <p>Bla bla bla.</p>
+          {% block content %}{% endblock %}
         </div>
       </div>
     </div>
