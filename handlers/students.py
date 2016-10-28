@@ -45,5 +45,6 @@ class StudentsHandler(webapp2.RequestHandler):
     def get(self):
         values = {
             "active": "alunos",
+            "students": Student.query().fetch()
         }
         self.response.write(render("templates/alunos.html", values))

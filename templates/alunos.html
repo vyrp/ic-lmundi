@@ -1,5 +1,7 @@
 {% extends "templates/base.html" %}
+
 {% block title %}Alunos{% endblock %}
+
 {% block content %}
   <form class="form-inline">
     <div class="form-group">
@@ -28,118 +30,15 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td>Lorem</td>
-          <td>ipsum</td>
-          <td>dolor</td>
-          <td>sit</td>
-          <td>1,001</td>
-        </tr>
-        <tr>
-          <td>amet</td>
-          <td>consectetur</td>
-          <td>adipiscing</td>
-          <td>elit</td>
-          <td>1,002</td>
-        </tr>
-        <tr>
-          <td>Integer</td>
-          <td>nec</td>
-          <td>odio</td>
-          <td>Praesent</td>
-          <td>1,003</td>
-        </tr>
-        <tr>
-          <td>libero</td>
-          <td>Sed</td>
-          <td>cursus</td>
-          <td>ante</td>
-          <td>1,003</td>
-        </tr>
-        <tr>
-          <td>dapibus</td>
-          <td>diam</td>
-          <td>Sed</td>
-          <td>nisi</td>
-          <td>1,004</td>
-        </tr>
-        <tr>
-          <td>Nulla</td>
-          <td>quis</td>
-          <td>sem</td>
-          <td>at</td>
-          <td>1,005</td>
-        </tr>
-        <tr>
-          <td>nibh</td>
-          <td>elementum</td>
-          <td>imperdiet</td>
-          <td>Duis</td>
-          <td>1,006</td>
-        </tr>
-        <tr>
-          <td>sagittis</td>
-          <td>ipsum</td>
-          <td>Praesent</td>
-          <td>mauris</td>
-          <td>1,007</td>
-        </tr>
-        <tr>
-          <td>Fusce</td>
-          <td>nec</td>
-          <td>tellus</td>
-          <td>sed</td>
-          <td>1,008</td>
-        </tr>
-        <tr>
-          <td>augue</td>
-          <td>semper</td>
-          <td>porta</td>
-          <td>Mauris</td>
-          <td>1,009</td>
-        </tr>
-        <tr>
-          <td>massa</td>
-          <td>Vestibulum</td>
-          <td>lacinia</td>
-          <td>arcu</td>
-          <td>1,010</td>
-        </tr>
-        <tr>
-          <td>eget</td>
-          <td>nulla</td>
-          <td>Class</td>
-          <td>aptent</td>
-          <td>1,011</td>
-        </tr>
-        <tr>
-          <td>taciti</td>
-          <td>sociosqu</td>
-          <td>ad</td>
-          <td>litora</td>
-          <td>1,012</td>
-        </tr>
-        <tr>
-          <td>torquent</td>
-          <td>per</td>
-          <td>conubia</td>
-          <td>nostra</td>
-          <td>1,013</td>
-        </tr>
-        <tr>
-          <td>per</td>
-          <td>inceptos</td>
-          <td>himenaeos</td>
-          <td>Curabitur</td>
-          <td>1,014</td>
-        </tr>
-        <tr>
-          <td>sodales</td>
-          <td>ligula</td>
-          <td>in</td>
-          <td>libero</td>
-          <td>1,015</td>
-        </tr>
+        {% for student in students %}
+          <tr data-id="{{ student.key.id() }}">
+            <td>{{ student.name }}</td>
+            <td>{{ student.surname }}</td>
+            <td>{{ student.first_contact.strftime('%d/%m/%Y') }}</td>
+            <td>{{ student.email }}</td>
+            <td>{{ student.telephone }}</td>
+          </tr>
+        {% endfor %}
       </tbody>
     </table>
   </div>
@@ -154,6 +53,9 @@
 $(document).ready(function(){
   $("#new-student-button").click(function(){
     window.location.href = "/aluno/";
+  });
+  $("tr").click(function(){
+    window.location.href = "/aluno/" + $(this).data("id");
   });
 });
 </script>
