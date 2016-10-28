@@ -40,7 +40,7 @@
             <li class="{% if active == 'configuracoes' %} active {% endif %}"><a href="/configuracoes">Configurações</a></li>
           </ul>
           <hr>
-          <p>Copyright © 2016 vyrp</p>
+          <p>Copyright © 2016 <a href="https://github.com/vyrp">vyrp</a></p>
         </div>
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
           {% block content %}{% endblock %}
@@ -50,5 +50,6 @@
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+    {% block js %}{% endblock %}
   </body>
 </html>

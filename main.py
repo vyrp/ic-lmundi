@@ -5,11 +5,11 @@ from controllers import handler_404, handler_500
 app = webapp2.WSGIApplication([
     ('/(?:home)?', HomeHandler),
     ('/alunos', StudentsHandler),
-    ('/aluno/(\w+)', StudentHandler),
+    ('/aluno/(\d+)?', StudentHandler),
     ('/professores', TeachersHandler),
-    ('/professor/(\w+)', TeacherHandler),
+    ('/professor/(\d+)?', TeacherHandler),
     ('/turmas', ClassesHandler),
-    ('/turma/(\w+)', ClassHandler),
+    ('/turma/(\d+)?', ClassHandler),
     ('/configuracoes', SettingsHandler),
 ], debug=True)
 

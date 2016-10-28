@@ -1,8 +1,12 @@
+import datetime
 import jinja2
 import logging
 import os
 import traceback
 import webapp2
+
+from google.appengine.ext import ndb
+from models import Student
 
 jinja = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -55,9 +59,30 @@ class StudentHandler(webapp2.RequestHandler):
     def get(self, id):
         values = {
             "active": "alunos",
-            "id": id
         }
+
+        if id:
+            student = Student.get_by_id(long(id))
+            values["student"] = student
+            values["id"] = id
+
         self.response.write(render("templates/aluno.html", values))
+
+    def post(self, id):
+        student = Student.get_by_id(long(id)) if id else Student()
+        student.populate(
+            name=self.request.get("name"),
+            surname=self.request.get("surname"),
+            first_contact=datetime.datetime.strptime(self.request.get("first_contact"), "%d/%m/%Y").date(),
+            telephone=self.request.get("telephone"),
+            email=self.request.get("email"),
+        )
+        student.put()
+
+        self.redirect("/aluno/" + str(student.key.id()))
+
+    def delete(self, id):
+        ndb.Key(Student, long(id)).delete()
 
 class StudentsHandler(webapp2.RequestHandler):
     def get(self):
