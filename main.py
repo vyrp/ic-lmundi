@@ -1,17 +1,22 @@
+import logging
+import os
+import sys
 import webapp2
-from controllers import ClassesHandler, ClassHandler, HomeHandler, SettingsHandler, StudentHandler, StudentsHandler, TeacherHandler, TeachersHandler
-from controllers import handler_404, handler_500
+
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
+from handlers import basic, classes, errors, students, teachers
 
 app = webapp2.WSGIApplication([
-    ('/(?:home)?', HomeHandler),
-    ('/alunos', StudentsHandler),
-    ('/aluno/(\d+)?', StudentHandler),
-    ('/professores', TeachersHandler),
-    ('/professor/(\d+)?', TeacherHandler),
-    ('/turmas', ClassesHandler),
-    ('/turma/(\d+)?', ClassHandler),
-    ('/configuracoes', SettingsHandler),
+    ('/(?:home)?', basic.HomeHandler),
+    ('/alunos', students.StudentsHandler),
+    ('/aluno/(\d+)?', students.StudentHandler),
+    ('/professores', teachers.TeachersHandler),
+    ('/professor/(\d+)?', teachers.TeacherHandler),
+    ('/turmas', classes.ClassesHandler),
+    ('/turma/(\d+)?', classes.ClassHandler),
+    ('/configuracoes', basic.SettingsHandler),
 ], debug=True)
 
-app.error_handlers[404] = handler_404
-app.error_handlers[500] = handler_500
+app.error_handlers[500] = errors.handler_500
+app.error_handlers[404] = errors.handler_404
