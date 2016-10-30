@@ -7,6 +7,9 @@
     <button type="button" class="btn btn-default" id="back-button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>&nbsp;&nbsp;Voltar para todos os alunos
   </div>
   <hr>
+  {% if message %}
+  <div class="alert alert-{{ message_type }}" role="alert">{{ message }}</div>
+  {% endif %}
   <form class="form-horizontal" action="/aluno/{{id}}" method="POST">
     <div class="form-group">
       <label for="name" class="col-sm-2 control-label">Nome</label>
@@ -48,20 +51,20 @@
 {% endblock %}
 
 {% block js %}
-<script>
-$(document).ready(function(){
-  $("#back-button").click(function(){
-    window.location.href = "/alunos";
-  });
-  $("#delete-button").click(function(){
-    $.ajax({
-      url: "/aluno/{{ id }}",
-      type: 'DELETE',
-      success: function(result) {
-          window.location.href = "/alunos";
-      }
+  <script>
+    $(function(){
+      $("#back-button").click(function(){
+        window.location.href = "/alunos";
+      });
+      $("#delete-button").click(function(){
+        $.ajax({
+          url: "/aluno/{{ id }}",
+          type: 'DELETE',
+          success: function(result) {
+            window.location.replace("/alunos?m=STUDENT_DELETE_SUCCESS");
+          }
+        });
+      });
     });
-  });
-});
-</script>
+  </script>
 {% endblock %}

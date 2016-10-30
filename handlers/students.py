@@ -1,5 +1,7 @@
 import datetime
 import logging
+import messages
+import urllib
 import webapp2
 
 from google.appengine.ext import ndb
@@ -23,6 +25,11 @@ class StudentHandler(webapp2.RequestHandler):
             values["student"] = student
             values["id"] = id
 
+        m = self.request.get("m")
+        if m:
+            values["message"] = messages.messages[m]
+            values["message_type"] = messages.types[m]
+
         self.response.write(render("templates/aluno.html", values))
 
     def post(self, id):
@@ -36,7 +43,7 @@ class StudentHandler(webapp2.RequestHandler):
         )
         student.put()
 
-        self.redirect("/aluno/" + str(student.key.id()))
+        self.redirect("/aluno/" + str(student.key.id()) + "?" + urllib.urlencode({"m": messages.STUDENT_SUCCESS}))
 
     def delete(self, id):
         ndb.Key(Student, long(id)).delete()
@@ -47,4 +54,10 @@ class StudentsHandler(webapp2.RequestHandler):
             "active": "alunos",
             "students": Student.query().fetch()
         }
+
+        m = self.request.get("m")
+        if m:
+            values["message"] = messages.messages[m]
+            values["message_type"] = messages.types[m]
+
         self.response.write(render("templates/alunos.html", values))
