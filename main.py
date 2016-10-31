@@ -1,11 +1,10 @@
-import logging
 import os
 import sys
 import webapp2
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from handlers import basic, classes, errors, students, teachers
+from handlers import basic, classes, errors, students, teachers  # noqa: E402
 
 app = webapp2.WSGIApplication([
     ('/(?:home)?', basic.HomeHandler),

@@ -7,5 +7,6 @@ jinja = jinja2.Environment(
     autoescape=True
 )
 
+
 def render(template, values={}):
     return jinja.get_template(template).render(values)

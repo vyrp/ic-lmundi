@@ -1,5 +1,4 @@
 import datetime
-import logging
 import messages
 import urllib
 import webapp2
@@ -7,12 +6,14 @@ import webapp2
 from google.appengine.ext import ndb
 from helpers import render
 
+
 class Student(ndb.Model):
     name = ndb.StringProperty()
     surname = ndb.StringProperty()
     first_contact = ndb.DateProperty()
     telephone = ndb.StringProperty()
     email = ndb.StringProperty()
+
 
 class StudentHandler(webapp2.RequestHandler):
     def get(self, id):
@@ -34,19 +35,27 @@ class StudentHandler(webapp2.RequestHandler):
 
     def post(self, id):
         student = Student.get_by_id(long(id)) if id else Student()
+
+        first_contact = datetime.datetime.strptime(
+            self.request.get("first_contact"),
+            "%d/%m/%Y"
+        ).date()
+
         student.populate(
             name=self.request.get("name"),
             surname=self.request.get("surname"),
-            first_contact=datetime.datetime.strptime(self.request.get("first_contact"), "%d/%m/%Y").date(),
+            first_contact=first_contact,
             telephone=self.request.get("telephone"),
             email=self.request.get("email"),
         )
         student.put()
 
-        self.redirect("/aluno/" + str(student.key.id()) + "?" + urllib.urlencode({"m": messages.STUDENT_SUCCESS}))
+        arguments = urllib.urlencode({"m": messages.STUDENT_SUCCESS})
+        self.redirect("/aluno/" + str(student.key.id()) + "?" + arguments)
 
     def delete(self, id):
         ndb.Key(Student, long(id)).delete()
+
 
 class StudentsHandler(webapp2.RequestHandler):
     def get(self):
