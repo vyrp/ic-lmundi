@@ -13,33 +13,38 @@
   {% if show_form %}
   <form class="form-horizontal" action="/aluno/{{id}}" method="POST">
     <div class="form-group">
-      <label for="name" class="col-sm-2 control-label">Nome</label>
+      <label for="name" class="col-sm-2 control-label">Nome*</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="name" name="name" placeholder="Nome" {% if student %}value="{{student.name}}"{% endif %}>
+        <input type="text" class="form-control" id="name" name="name" placeholder="Nome" {% if student %}value="{{student.name}}"{% endif %}
+               data-validation="required" required>
       </div>
     </div>
     <div class="form-group">
-      <label for="surname" class="col-sm-2 control-label">Sobrenome</label>
+      <label for="surname" class="col-sm-2 control-label">Sobrenome*</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="surname" name="surname" placeholder="Sobrenome" {% if student %}value="{{student.surname}}"{% endif %}>
+        <input type="text" class="form-control" id="surname" name="surname" placeholder="Sobrenome" {% if student %}value="{{student.surname}}"{% endif %}
+               data-validation="required" required>
       </div>
     </div>
     <div class="form-group">
-      <label for="first_contact" class="col-sm-2 control-label">Data do primeiro contato</label>
+      <label for="first_contact" class="col-sm-2 control-label">Data do primeiro contato*</label>
       <div class="col-sm-10">
-        <input type="text" class="form-control" id="first_contact" name="first_contact" placeholder="dd/mm/aaaa" {% if student %}value="{{student.first_contact.strftime('%d/%m/%Y')}}"{% endif %}>
+        <input type="text" class="form-control" id="first_contact" name="first_contact" placeholder="dd/mm/aaaa" {% if student %}value="{{student.first_contact.strftime('%d/%m/%Y')}}"{% endif %}
+               data-validation="date dategt1900" data-validation-format="dd/mm/yyyy" required>
       </div>
     </div>
     <div class="form-group">
-      <label for="telephone" class="col-sm-2 control-label">Telefone</label>
+      <label for="telephone" class="col-sm-2 control-label">Telefone*</label>
       <div class="col-sm-10">
-        <input type="tel" class="form-control" id="telephone" name="telephone" placeholder="+55 (61) 98888-7777" {% if student %}value="{{student.telephone}}"{% endif %}>
+        <input type="tel" class="form-control" id="telephone" name="telephone" placeholder="(61) 98888-7777" {% if student %}value="{{student.telephone}}"{% endif %}
+               data-validation="brphone" required>
       </div>
     </div>
     <div class="form-group">
-      <label for="email" class="col-sm-2 control-label">Email</label>
+      <label for="email" class="col-sm-2 control-label">Email*</label>
       <div class="col-sm-10">
-        <input type="email" class="form-control" id="email" name="email" placeholder="alguem@email.com" {% if student %}value="{{student.email}}"{% endif %}>
+        <input type="email" class="form-control" id="email" name="email" placeholder="alguem@email.com" {% if student %}value="{{student.email}}"{% endif %}
+               data-validation="email" required>
       </div>
     </div>
     <div class="form-group">
@@ -50,4 +55,38 @@
     </div>
   </form>
   {% endif %}
+{% endblock %}
+
+{% block js %}
+  <script src="https://rawgit.com/RobinHerbots/Inputmask/3.x/dist/jquery.inputmask.bundle.js"></script>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+  <script>
+    $(function(){
+      $("#first_contact").inputmask("99/99/9999");
+      $("#telephone").inputmask({
+        mask: "(99) 9999[9]-9999",
+        onincomplete: function() {
+          if (/\d_$/.test(this.value)) {
+            var unmasked = this.inputmask.unmaskedvalue();
+            this.value = unmasked.slice(0, -4) + "-" + unmasked.slice(-4);
+            $(this).validate();
+          }
+        },
+      });
+
+      $.formUtils.addValidator({
+        name : "dategt1900",
+        validatorFunction : function(value, $el, config, language, $form) {
+            return parseInt(value.split("/")[2]) >= 1900;
+        },
+        errorMessage : "O ano deve ser maior ou igual a 1900",
+        errorMessageKey: "dategt1900"
+      });
+
+      $.validate({
+        modules: "date, brazil",
+        lang: "pt"
+      });
+    });
+  </script>
 {% endblock %}

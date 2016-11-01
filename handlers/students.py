@@ -10,7 +10,7 @@ from helpers import active, get_m, render, update_m
 
 
 class Student(ndb.Model):
-    _telephone_regex = re.compile(r"^\+\d{1,2} \(\d+\) \d+\-\d+$")
+    _telephone_regex = re.compile(r"\(\d{2}\) \d{4,5}\-\d{4}$")
 
     def validate_telephone(self, value):
         value = value.strip()
@@ -27,9 +27,14 @@ class Student(ndb.Model):
             return value
         raise ValueError("Value for '%s' is empty." % self._name)
 
+    def recent_date(self, value):
+        if value.year >= 1900:
+            return value
+        raise ValueError("Year must be >= 1900.")
+
     name = ndb.StringProperty(required=True, validator=non_empty)
     surname = ndb.StringProperty(required=True, validator=non_empty)
-    first_contact = ndb.DateProperty(required=True)
+    first_contact = ndb.DateProperty(required=True, validator=recent_date)
     telephone = ndb.StringProperty(required=True, validator=validate_telephone)
     email = ndb.StringProperty(required=True, validator=non_empty)
 
