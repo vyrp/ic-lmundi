@@ -4,7 +4,7 @@
 
 {% block content %}
   <div>
-    <button type="button" class="btn btn-default" id="back-button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></button>&nbsp;&nbsp;Voltar para todos os alunos
+    <a href="/alunos" class="btn btn-default" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>&nbsp;&nbsp;Voltar para todos os alunos
   </div>
   <hr>
   {% if message %}
@@ -43,28 +43,9 @@
     </div>
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
-        <button type="submit" class="btn btn-primary">{% if student %} Atualizar {% else %} Criar {% endif %}</button>
-        {% if student %} <button id="delete-button" type="button" class="btn btn-danger">Remover</button> {% endif %}
+        <button type="submit" class="btn btn-primary" name="edit">{% if student %} Atualizar {% else %} Criar {% endif %}</button>
+        {% if student %} <button type="submit" class="btn btn-danger" name="delete">Remover</button> {% endif %}
       </div>
     </div>
   </form>
-{% endblock %}
-
-{% block js %}
-  <script>
-    $(function(){
-      $("#back-button").click(function(){
-        window.location.href = "/alunos";
-      });
-      $("#delete-button").click(function(){
-        $.ajax({
-          url: "/aluno/{{ id }}",
-          type: 'DELETE',
-          success: function(result) {
-            window.location.replace("/alunos?m=STUDENT_DELETE_SUCCESS");
-          }
-        });
-      });
-    });
-  </script>
 {% endblock %}

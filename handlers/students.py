@@ -1,4 +1,5 @@
 import datetime
+import logging
 import messages
 import urllib
 import webapp2
@@ -34,27 +35,35 @@ class StudentHandler(webapp2.RequestHandler):
         self.response.write(render("templates/aluno.html", values))
 
     def post(self, id):
-        student = Student.get_by_id(long(id)) if id else Student()
+        r = self.request
 
-        first_contact = datetime.datetime.strptime(
-            self.request.get("first_contact"),
-            "%d/%m/%Y"
-        ).date()
+        if "edit" in r.arguments():
+            student = Student.get_by_id(long(id)) if id else Student()
 
-        student.populate(
-            name=self.request.get("name"),
-            surname=self.request.get("surname"),
-            first_contact=first_contact,
-            telephone=self.request.get("telephone"),
-            email=self.request.get("email"),
-        )
-        student.put()
+            first_contact = datetime.datetime.strptime(
+                r.get("first_contact"),
+                "%d/%m/%Y"
+            ).date()
 
-        arguments = urllib.urlencode({"m": messages.STUDENT_SUCCESS})
-        self.redirect("/aluno/" + str(student.key.id()) + "?" + arguments)
+            student.populate(
+                name=r.get("name"),
+                surname=r.get("surname"),
+                first_contact=first_contact,
+                telephone=r.get("telephone"),
+                email=r.get("email"),
+            )
+            student.put()
 
-    def delete(self, id):
-        ndb.Key(Student, long(id)).delete()
+            arguments = urllib.urlencode({"m": messages.STUDENT_CREATE_SUCCESS})
+            self.redirect("/aluno/" + str(student.key.id()) + "?" + arguments)
+        elif "delete" in r.arguments():
+            ndb.Key(Student, long(id)).delete()
+            arguments = urllib.urlencode({"m": messages.STUDENT_DELETE_SUCCESS})
+            self.redirect("/alunos?" + arguments)
+        else:
+            logging.warning("Unknown action: " + str(r.arguments()))
+            arguments = urllib.urlencode({"m": messages.UNKNOWN_ACTION})
+            self.redirect("/aluno/" + id + "?" + arguments)
 
 
 class StudentsHandler(webapp2.RequestHandler):

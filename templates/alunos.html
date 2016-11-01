@@ -48,15 +48,12 @@
 
   <hr>
 
-  <button type="button" class="btn btn-success btn-sm" id="new-student-button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button> Adicionar novo aluno
+  <a href="/aluno/" class="btn btn-success btn-sm" role="button"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></a> Adicionar novo aluno
 {% endblock %}
 
 {% block js %}
   <script>
     $(function(){
-      $("#new-student-button").click(function(){
-        window.location.href = "/aluno/";
-      });
       $("tr").click(function(){
         window.location.href = "/aluno/" + $(this).data("id");
       });
