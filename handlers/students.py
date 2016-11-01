@@ -6,7 +6,7 @@ import urllib
 import webapp2
 
 from google.appengine.ext import ndb
-from helpers import get_m, render, update_m
+from helpers import active, get_m, render, update_m
 
 
 class Student(ndb.Model):
@@ -35,15 +35,16 @@ class Student(ndb.Model):
 
 
 class StudentHandler(webapp2.RequestHandler):
-    def get(self, id):
-        values = {
-            "active": "alunos",
-            "show_form": True,
-        }
+    @active("alunos")
+    def get(self, id, values):
+        values["show_form"] = True
 
         m = get_m(self.request)
 
-        if id:
+        if m == messages.UNKNOWN_ACTION:
+            values["show_form"] = False
+            self.response.status = 400
+        elif id:
             student = Student.get_by_id(long(id))
             if student:
                 values["student"] = student
@@ -57,25 +58,31 @@ class StudentHandler(webapp2.RequestHandler):
         self.response.write(render("templates/aluno.html", values))
 
     def post(self, id):
-        r = self.request
+        if "edit" in self.request.arguments():
+            self.create_or_edit_student(id)
+        elif "delete" in self.request.arguments():
+            self.delete_student(id)
+        else:
+            logging.warning("Unknown action: " + str(self.request.arguments()))
+            arguments = urllib.urlencode({"m": messages.UNKNOWN_ACTION})
+            self.redirect("/aluno/" + id + "?" + arguments)
 
-        if "edit" in r.arguments():
-            if id:
-                student = Student.get_by_id(long(id))
-                if not student:
-                    self.response.status = 400
-                    return
-            else:
-                student = Student()
-
-            try:
-                first_contact = datetime.datetime.strptime(
-                    r.get("first_contact"),
-                    "%d/%m/%Y"
-                ).date()
-            except ValueError:
-                self.response.status = 400
+    def create_or_edit_student(self, id):
+        if id:
+            student = Student.get_by_id(long(id))
+            if not student:
+                self.redirect("/aluno/" + id)
                 return
+        else:
+            student = Student()
+
+        try:
+            r = self.request
+
+            first_contact = datetime.datetime.strptime(
+                r.get("first_contact"),
+                "%d/%m/%Y"
+            ).date()
 
             student.populate(
                 name=r.get("name"),
@@ -84,28 +91,28 @@ class StudentHandler(webapp2.RequestHandler):
                 telephone=r.get("telephone"),
                 email=r.get("email"),
             )
+
             student.put()
 
-            arguments = urllib.urlencode({"m": messages.STUDENT_CREATE_SUCCESS})
-            self.redirect("/aluno/" + str(student.key.id()) + "?" + arguments)
-        elif "delete" in r.arguments():
-            ndb.Key(Student, long(id)).delete()
-            arguments = urllib.urlencode({"m": messages.STUDENT_DELETE_SUCCESS})
-            self.redirect("/alunos?" + arguments)
+            m = messages.STUDENT_UPDATE_SUCCESS if id else messages.STUDENT_CREATE_SUCCESS
+            self.redirect("/aluno/" + str(student.key.id()) + "?" + urllib.urlencode({"m": m}))
+        except ValueError as ex:
+            logging.warning("ValueError: " + ex.message)
+            m = messages.STUDENT_UPDATE_ERROR if id else messages.STUDENT_CREATE_ERROR
+            self.redirect("/aluno/?" + urllib.urlencode({"m": m}))
+
+    def delete_student(self, id):
+        student = Student.get_by_id(long(id))
+        if student:
+            student.key.delete()
+            self.redirect("/alunos?" + urllib.urlencode({"m": messages.STUDENT_DELETE_SUCCESS}))
         else:
-            logging.warning("Unknown action: " + str(r.arguments()))
-            arguments = urllib.urlencode({"m": messages.UNKNOWN_ACTION})
-            self.redirect("/aluno/" + id + "?" + arguments)
+            self.redirect("/aluno/" + id)
 
 
 class StudentsHandler(webapp2.RequestHandler):
-    def get(self):
-        values = {
-            "active": "alunos",
-            "students": Student.query().fetch()
-        }
-
-        m = get_m(self.request)
-        update_m(values, m)
-
+    @active("alunos")
+    def get(self, values):
+        values["students"] = Student.query().fetch()
+        update_m(values, get_m(self.request))
         self.response.write(render("templates/alunos.html", values))
