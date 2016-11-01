@@ -1,4 +1,5 @@
 {% extends "templates/base.html" %}
+{% from "templates/base.html" import message_box %}
 
 {% block title %}Aluno{% endblock %}
 
@@ -7,9 +8,8 @@
     <a href="/alunos" class="btn btn-default" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>&nbsp;&nbsp;Voltar para todos os alunos
   </div>
   <hr>
-  {% if message %}
-  <div class="alert alert-{{ message_type }}" role="alert">{{ message }}</div>
-  {% endif %}
+  {{ message_box(message, message_type) }}
+
   {% if show_form %}
   <form class="form-horizontal" action="/aluno/{{id}}" method="POST">
     <div class="form-group">

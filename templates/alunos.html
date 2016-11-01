@@ -1,4 +1,5 @@
 {% extends "templates/base.html" %}
+{% from "templates/base.html" import message_box %}
 
 {% block title %}Alunos{% endblock %}
 
@@ -17,9 +18,7 @@
   </form>
 
   <hr>
-  {% if message %}
-  <div class="alert alert-{{ message_type }}" role="alert">{{ message }}</div>
-  {% endif %}
+  {{ message_box(message, message_type) }}
 
   <div class="table-responsive">
     <table class="table table-striped table-hover">
