@@ -1,19 +1,15 @@
 import webapp2
 
-from helpers import render
+from helpers import active, render
 
 
 class HomeHandler(webapp2.RequestHandler):
-    def get(self):
-        values = {
-            "active": "home",
-        }
+    @active("home")
+    def get(self, values):
         self.response.write(render("templates/home.html", values))
 
 
 class SettingsHandler(webapp2.RequestHandler):
-    def get(self):
-        values = {
-            "active": "configuracoes",
-        }
+    @active("configuracoes")
+    def get(self, values):
         self.response.write(render("templates/configuracoes.html", values))

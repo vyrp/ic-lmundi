@@ -4,7 +4,7 @@ import webapp2
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from handlers import basic, classes, errors, students, teachers  # noqa: E402
+from handlers import ajax, basic, classes, errors, students, teachers  # noqa: E402
 
 app = webapp2.WSGIApplication([
     ('/(?:home)?', basic.HomeHandler),
@@ -15,6 +15,7 @@ app = webapp2.WSGIApplication([
     ('/turmas', classes.ClassesHandler),
     ('/turma/(\d+)?', classes.ClassHandler),
     ('/configuracoes', basic.SettingsHandler),
+    ('/ajax', ajax.AjaxHandler),
 ], debug=True)
 
 app.error_handlers[500] = errors.handler_500

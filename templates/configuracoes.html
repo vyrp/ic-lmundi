@@ -1,23 +1,166 @@
 {% extends "templates/base.html" %}
+
 {% block title %}Configurações{% endblock %}
+
+{% block css %}
+  <style>
+    .pointer {
+      cursor: pointer;
+    }
+    .plus-cell {
+      border-bottom-left-radius: 10px;
+      border-bottom-right-radius: 10px;
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
-  <form class="form-horizontal">
-    <div class="form-group">
-      <label for="inputEmail3" class="col-sm-2 control-label">Email</label>
-      <div class="col-sm-10">
-        <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+  <div>
+    <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 15px">
+      <li role="presentation" class="active">
+        <a href="#emails" aria-controls="emails" role="tab" data-toggle="tab">Emails Autorizados</a>
+      </li>
+      <li role="presentation">
+        <a href="#languages" aria-controls="languages" role="tab" data-toggle="tab">Idiomas</a>
+      </li>
+      <li role="presentation">
+        <a href="#modalities" aria-controls="modalities" role="tab" data-toggle="tab">Modalidades</a>
+      </li>
+      <li role="presentation">
+        <a href="#payments" aria-controls="payments" role="tab" data-toggle="tab">Formas de pagamento</a>
+      </li>
+    </ul>
+    <div class="tab-content">
+      <div role="tabpanel" class="tab-pane active" id="emails">
+        <div class="row">
+          <div class="col-md-7">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for idx, email in [(0, "joao.silva@gmail.com"), (1, "maria_lima@yahoo.ca"), (2, "gostosao12344@outlook.com")] %}
+                  <tr data-id="{{ idx }}">
+                    <td>{{ email }}</td>
+                    <td>
+                      <span class="glyphicon glyphicon-pencil pointer" aria-hidden="true"></span>
+                      <span>&nbsp;&nbsp;&nbsp;</span>
+                      <span class="glyphicon glyphicon-trash pointer" aria-hidden="true"></span>
+                    </td>
+                  </tr>
+                {% endfor %}
+                <tr class="active">
+                  <td class="plus-cell pointer" colspan=2 align="center">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
+      <div role="tabpanel" class="tab-pane" id="languages">BBBBBBBBBB</div>
+      <div role="tabpanel" class="tab-pane" id="modalities">CCCCCCCCCCCCCCCCCCCC</div>
+      <div role="tabpanel" class="tab-pane" id="payments">DDDDDDDDDDDDDDDDDD</div>
     </div>
-    <div class="form-group">
-      <label for="inputPassword3" class="col-sm-2 control-label">Password</label>
-      <div class="col-sm-10">
-        <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
-      </div>
-    </div>
-    <div class="form-group">
-      <div class="col-sm-offset-2 col-sm-10">
-        <button type="submit" class="btn btn-default">Save</button>
-      </div>
-    </div>
-  </form>
+  </div>
+{% endblock %}
+
+{% block js %}
+  <script>
+    $(function(){
+      function rotateForEver($elem) {
+        return $({deg: 0}).animate(
+          {deg: 360},
+          {
+            duration: 2000,
+            easing: "linear",
+            step: function(now){
+              $elem.css({transform: "rotate(" + now + "deg)"});
+            },
+            complete: rotateForEver.bind(this, $elem)
+          }
+        );
+      }
+
+      function changeTo($indicator, type, color, newTooltip) {
+        $indicator.css({transform: "rotate(0deg)", color: color})
+                  .removeClass("glyphicon-refresh")
+                  .addClass("glyphicon-" + type)
+                  .tooltip("hide")
+                  .attr("data-original-title", newTooltip)
+                  .tooltip("fixTitle");
+      }
+
+      function pencilClickHandler() {
+        var $actionsCell = $(this).parent();
+        var $tr = $actionsCell.parent();
+        var id = $tr.data("id");
+        var $emailCell = $tr.children().first();
+        var oldEmail = $emailCell.text();
+        var $input = $('<input type="text" class="form-control" value="' + oldEmail + '">');
+        $emailCell.html($input);
+        $input.select();
+
+        $input.keyup(function(event){
+          switch (event.which) {
+            case 13: // Enter
+              $emailCell.html($input.val());
+              $actionsCell.append("<span>&nbsp;&nbsp;&nbsp;</span>" +
+                '<span class="glyphicon glyphicon-refresh" aria-hidden="true"' +
+                'data-toggle="tooltip" data-placement="right" title="Sincronizando..."></span>');
+              var $indicator = $actionsCell.children().last().tooltip();
+              var $rotation = rotateForEver($indicator);
+              $.post({
+                url: "/ajax",
+                data: {
+                  id: id,
+                  email: $input.val()
+                },
+                success: function(data, textStatus, jqXHR){
+                  $rotation.stop();
+                  changeTo($indicator, "ok", "green", "Sucesso");
+                  setTimeout(function(){
+                    $indicator.animate({width:"toggle"}, 300, function(){
+                      $indicator.remove();
+                      $actionsCell.children().last().remove();
+                    });
+                  }, 3000);
+                },
+                error: function(jqXHR, textStatus, errorThrown){
+                  $rotation.stop();
+                  changeTo($indicator, "remove", "red", "Erro: " + jqXHR.status + " " + errorThrown);
+                  $emailCell.html(oldEmail);
+                }
+              });
+              break;
+            case 27: // Esc
+              $emailCell.html(oldEmail);
+              break;
+          }
+        });
+      }
+
+      $(".glyphicon-pencil").click(pencilClickHandler);
+
+      $(".plus-cell").click(function(){
+        var $table = $(this).parents("tbody");
+        var $newRow = $(
+          '<tr data-id="' + $table.children().length + '">' +
+            '<td></td>' +
+            '<td>' +
+              '<span class="glyphicon glyphicon-pencil pointer" aria-hidden="true"></span>\n' +
+              '<span>&nbsp;&nbsp;&nbsp;</span>\n' +
+              '<span class="glyphicon glyphicon-trash pointer" aria-hidden="true"></span>' +
+            '</td>' +
+          '</tr>'
+        );
+        $table.children("tr.active").before($newRow);
+        $newRow.find(".glyphicon-pencil").click(pencilClickHandler).click();
+      });
+    });
+  </script>
 {% endblock %}
