@@ -1,5 +1,6 @@
 import os
 import sys
+import threading
 import webapp2
 
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -15,8 +16,10 @@ app = webapp2.WSGIApplication([
     ('/turmas', classes.ClassesHandler),
     ('/turma/(\d+)?', classes.ClassHandler),
     ('/configuracoes', basic.SettingsHandler),
-    ('/ajax', ajax.AjaxHandler),
+    ('/ajax/(emails|languages|modalities|payments)/(add|edit|remove)', ajax.AjaxHandler),
 ], debug=True)
+
+app.registry["settings_lock"] = threading.Lock()
 
 app.error_handlers[500] = errors.handler_500
 app.error_handlers[404] = errors.handler_404

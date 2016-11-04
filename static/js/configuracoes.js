@@ -26,6 +26,7 @@ $(function(){
         var $actionsCell = $(this).parent();
         var $tr = $actionsCell.parent();
         var id = $tr.data("id");
+        var isNew = (id === "none");
         var $emailCell = $tr.children().first();
         var oldEmail = $emailCell.text();
         var $input = $('<input type="text" class="form-control" value="' + oldEmail + '">');
@@ -47,12 +48,16 @@ $(function(){
                     var $indicator = $actionsCell.children().last().tooltip();
                     var $rotation = rotateForEver($indicator);
                     $.post({
-                        url: "/ajax",
+                        url: "/ajax/emails/" + (isNew ? "add" : "edit"),
                         data: {
                             id: id,
-                            email: $input.val()
+                            value: $input.val()
                         },
                         success: function(data, textStatus, jqXHR){
+                            if (isNew) {
+                                $tr.data("id", data);
+                            }
+
                             $rotation.stop();
                             changeTo($indicator, "ok", "green", "Sucesso");
                             setTimeout(function(){
@@ -74,15 +79,17 @@ $(function(){
                     });
                     break;
                 case 27: // Esc
-                    $emailCell.html(oldEmail);
+                    if (isNew) {
+                        $tr.remove();
+                    } else {
+                        $emailCell.html(oldEmail);
+                    }
                     break;
             }
         });
     }
 
-    $(".glyphicon-pencil").click(pencilClickHandler);
-
-    $(".glyphicon-trash").click(function(){
+    function trashClickHandler() {
         var $actionsCell = $(this).parent();
         var $tr = $actionsCell.parent();
         var id = $tr.data("id");
@@ -97,7 +104,7 @@ $(function(){
         var $indicator = $actionsCell.children().last().tooltip();
         var $rotation = rotateForEver($indicator);
         $.post({
-            url: "/ajax",
+            url: "/ajax/emails/remove",
             data: {
                 id: id
             },
@@ -114,7 +121,11 @@ $(function(){
                     "Erro: " + jqXHR.status + " " + errorThrown);
             }
         });
-    });
+    }
+
+    $(".glyphicon-pencil").click(pencilClickHandler);
+
+    $(".glyphicon-trash").click(trashClickHandler);
 
     $(".plus-cell").click(function(){
         var $table = $(this).parents("tbody");
@@ -122,7 +133,7 @@ $(function(){
         //  1) create hidden html element with id="template" and clone it
         //  2) use jinja macro to DRY
         var $newRow = $(
-            '<tr data-id="' + $table.children().length + '">' +
+            '<tr data-id="none">' +
             '<td></td>' +
             '<td>' +
                 '<span class="glyphicon glyphicon-pencil pointer" aria-hidden="true"></span>\n' +
@@ -132,5 +143,6 @@ $(function(){
             '</tr>');
         $table.children("tr.active").before($newRow);
         $newRow.find(".glyphicon-pencil").click(pencilClickHandler).click();
+        $newRow.find(".glyphicon-trash").click(trashClickHandler);
     });
 });

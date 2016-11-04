@@ -42,8 +42,8 @@
                 </tr>
               </thead>
               <tbody>
-                {% for idx, email in [(0, "joao.silva@gmail.com"), (1, "maria_lima@yahoo.ca"), (2, "gostosao12344@outlook.com")] %}
-                  <tr data-id="{{ idx }}">
+                {% for id, email in emails %}
+                  <tr data-id="{{ id }}">
                     <td>{{ email }}</td>
                     <td>
                       <span class="glyphicon glyphicon-pencil pointer" aria-hidden="true"></span>
