@@ -14,15 +14,15 @@
   </style>
 {% endblock %}
 
-{% macro create_tab(id, title, active=False) -%}
+{% macro create_tab(category, title, active=False) -%}
   <li role="presentation" {% if active %} class="active" {% endif %}>
-    <a href="#{{ id }}" aria-controls="{{ id }}" role="tab" data-toggle="tab">{{ title }}</a>
+    <a href="#{{ category }}" aria-controls="{{ category }}" role="tab" data-toggle="tab">{{ title }}</a>
   </li>
 {%- endmacro %}
 
-{% macro create_row(id, email, hidden=False) -%}
+{% macro create_row(id, value, hidden=False) -%}
   <tr data-id="{{ id }}" {% if hidden %} hidden id="row-template" {% endif %}>
-    <td>{{ email }}</td>
+    <td>{{ value }}</td>
     <td>
       <span class="glyphicon glyphicon-pencil pointer" aria-hidden="true"></span>
       <span>&nbsp;&nbsp;&nbsp;</span>
@@ -30,6 +30,39 @@
     </td>
     <td></td>
   </tr>
+{%- endmacro %}
+
+{% macro create_tab_panel(category, title, values, active=False) -%}
+  <div role="tabpanel" class="tab-pane {% if active %} active {% endif %}" id="{{ category }}">
+    <div class="row">
+      <div class="col-md-8">
+        <table class="table">
+          <colgroup>
+            <col span="1" style="width: 70%;">
+            <col span="1" style="width: 15%;">
+            <col span="1" style="width: 15%;">
+          </colgroup>
+          <thead>
+            <tr>
+              <th>{{ title }}</th>
+              <th>Ações</th>
+              <th style="color:gray">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for id, value in values %}
+              {{ create_row(id, value) }}
+            {% endfor %}
+            <tr class="active">
+              <td class="plus-cell pointer" colspan=3 align="center">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 {%- endmacro %}
 
 {% block content %}
@@ -41,34 +74,10 @@
       {{ create_tab("payments", "Formas de pagamento") }}
     </ul>
     <div class="tab-content">
-      <div role="tabpanel" class="tab-pane active" id="emails">
-        <div class="row">
-          <div class="col-md-7">
-            <table class="table">
-              <thead>
-                <tr>
-                  <th>Email</th>
-                  <th>Ações</th>
-                  <th style="color:gray">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for id, email in emails %}
-                  {{ create_row(id, email) }}
-                {% endfor %}
-                <tr class="active">
-                  <td class="plus-cell pointer" colspan=3 align="center">
-                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div role="tabpanel" class="tab-pane" id="languages">BBBBBBBBBB</div>
-      <div role="tabpanel" class="tab-pane" id="modalities">CCCCCCCCCCCCCCCCCCCC</div>
-      <div role="tabpanel" class="tab-pane" id="payments">DDDDDDDDDDDDDDDDDD</div>
+      {{ create_tab_panel("emails", "Email", emails, True) }}
+      {{ create_tab_panel("languages", "Idioma", languages) }}
+      {{ create_tab_panel("modalities", "Modalidade", modalities) }}
+      {{ create_tab_panel("payments", "Forma", payments) }}
     </div>
     <table hidden>
       {{ create_row("new", "", True) }}

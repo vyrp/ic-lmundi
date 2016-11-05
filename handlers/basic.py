@@ -14,5 +14,6 @@ class SettingsHandler(webapp2.RequestHandler):
     @active("configuracoes")
     def get(self, values):
         settings = Settings.get_instance()
-        values["emails"] = sorted(settings["emails"].values.items())
+        for category in settings:
+            values[category] = sorted(settings[category].values.items())
         self.response.write(render("templates/configuracoes.html", values))

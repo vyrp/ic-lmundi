@@ -56,39 +56,40 @@ $(function(){
 
     function pencilClickHandler() {
         var $tr = $(this).parents("tr");
-        var $emailCell = $tr.children().first();
+        var $valueCell = $tr.children().first();
         var $statusCell = $tr.children().last();
         var id = $tr.data("id");
+        var category = $tr.parents(".tab-pane").get(0).id;
         var isNew = (id === "new");
-        var oldEmail = $emailCell.text();
+        var oldValue = $valueCell.text();
 
-        var $input = $('<input type="text" class="form-control" value="' + oldEmail + '">');
-        $emailCell.html($input);
+        var $input = $('<input type="text" class="form-control" value="' + oldValue + '">');
+        $valueCell.html($input);
         $input.select();
 
         function reset() {
             if (isNew) {
                 $tr.remove();
             } else {
-                $emailCell.html(oldEmail);
+                $valueCell.html(oldValue);
             }
         }
 
         $input.keyup(function(event){
             switch (event.which) {
                 case 13: // Key: Enter
-                    var newEmail = $input.val();
-                    $emailCell.html(newEmail);
+                    var newValue = $input.val();
+                    $valueCell.html(newValue);
 
                     var indicator = createIndicator($statusCell);
                     var $span = indicator.span;
                     var $rotation = indicator.rotation;
 
                     $.post({
-                        url: "/ajax/emails/" + (isNew ? "add" : "edit"),
+                        url: "/ajax/" + category + "/" + (isNew ? "add" : "edit"),
                         data: {
                             id: id,
-                            value: newEmail
+                            value: newValue
                         },
                         success: function(data, textStatus, jqXHR){
                             if (isNew) {
@@ -112,9 +113,10 @@ $(function(){
     function trashClickHandler() {
         var $tr = $(this).parents("tr");
         var indicator = createIndicator($tr.children().last());
+        var category = $tr.parents(".tab-pane").get(0).id;
 
         $.post({
-            url: "/ajax/emails/remove",
+            url: "/ajax/" + category + "/remove",
             data: {
                 id: $tr.data("id")
             },
@@ -127,15 +129,13 @@ $(function(){
 
     function addHandler() {
         var $table = $(this).parents("tbody");
-        var $newRow = $("#row-template").clone().show();
+        var $newRow = $("#row-template").clone().attr("id", "").show();
         $table.children("tr.active").before($newRow);
         $newRow.find(".glyphicon-pencil").click(pencilClickHandler).click();
         $newRow.find(".glyphicon-trash").click(trashClickHandler);
     }
 
     $(".glyphicon-pencil").click(pencilClickHandler);
-
     $(".glyphicon-trash").click(trashClickHandler);
-
     $(".plus-cell").click(addHandler);
 });
