@@ -1,6 +1,12 @@
 $(function(){
-    function rotateForEver($elem) {
-        return $({deg: 0}).animate(
+    function rotateForEver($elem, rotator) {
+        if (rotator === void(0)) {
+            rotator = $({deg: 0});
+        } else {
+            rotator.get(0).deg = 0;
+        }
+
+        return rotator.animate(
             {deg: 360},
             {
                 duration: 2000,
@@ -8,7 +14,9 @@ $(function(){
                 step: function(now){
                     $elem.css({transform: "rotate(" + now + "deg)"});
                 },
-                complete: rotateForEver.bind(this, $elem)
+                complete: function(){
+                    rotateForEver($elem, rotator);
+                },
             }
         );
     }
