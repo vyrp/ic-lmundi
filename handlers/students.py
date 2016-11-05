@@ -4,11 +4,12 @@ import messages
 import urllib
 import webapp2
 
-from helpers import active, get_m, render, update_m
+from helpers import active, get_m, render, secure, update_m
 from models.student import Student
 
 
 class StudentHandler(webapp2.RequestHandler):
+    @secure
     @active("alunos")
     def get(self, id, values):
         values["show_form"] = True
@@ -31,6 +32,7 @@ class StudentHandler(webapp2.RequestHandler):
 
         self.response.write(render("templates/aluno.html", values))
 
+    @secure
     def post(self, id):
         if "edit" in self.request.arguments():
             self.create_or_edit_student(id)
@@ -85,6 +87,7 @@ class StudentHandler(webapp2.RequestHandler):
 
 
 class StudentsHandler(webapp2.RequestHandler):
+    @secure
     @active("alunos")
     def get(self, values):
         values["students"] = Student.query().fetch()

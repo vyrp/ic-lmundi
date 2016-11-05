@@ -3,6 +3,8 @@ import messages
 import os
 
 from functools import wraps
+from google.appengine.api import users
+from models.settings import Settings
 
 jinja = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -41,3 +43,16 @@ def active(active_section):
             return func(*args, values={"active": active_section})
         return func_wrapper
     return active_decorator
+
+
+def secure(func):
+    @wraps(func)
+    def func_wrapper(self, *args):
+        user = users.get_current_user()
+        if user and user.email() in Settings.get_instance()["emails"].values.values():
+            return func(self, *args)
+        self.response.set_status(403)
+        self.response.write(
+            'Move along, nothing to do here! Move along...<br><a href="%s">Logout</a>' %
+            users.create_logout_url("/"))
+    return func_wrapper

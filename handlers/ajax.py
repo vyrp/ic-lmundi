@@ -1,9 +1,11 @@
 import webapp2
 
+from helpers import secure
 from models.settings import Settings
 
 
 class AjaxHandler(webapp2.RequestHandler):
+    @secure
     def post(self, category, command):
         settings = Settings.get_instance()
         items = settings[category]

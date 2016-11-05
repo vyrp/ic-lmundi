@@ -1,9 +1,10 @@
 import webapp2
 
-from helpers import render
+from helpers import render, secure
 
 
 class ClassesHandler(webapp2.RequestHandler):
+    @secure
     def get(self):
         values = {
             "active": "turmas",
@@ -12,6 +13,7 @@ class ClassesHandler(webapp2.RequestHandler):
 
 
 class ClassHandler(webapp2.RequestHandler):
+    @secure
     def get(self, id):
         values = {
             "active": "turmas",
