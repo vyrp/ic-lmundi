@@ -14,21 +14,31 @@
   </style>
 {% endblock %}
 
+{% macro create_tab(id, title, active=False) -%}
+  <li role="presentation" {% if active %} class="active" {% endif %}>
+    <a href="#{{ id }}" aria-controls="{{ id }}" role="tab" data-toggle="tab">{{ title }}</a>
+  </li>
+{%- endmacro %}
+
+{% macro create_row(id, email, hidden=False) -%}
+  <tr data-id="{{ id }}" {% if hidden %} hidden id="row-template" {% endif %}>
+    <td>{{ email }}</td>
+    <td>
+      <span class="glyphicon glyphicon-pencil pointer" aria-hidden="true"></span>
+      <span>&nbsp;&nbsp;&nbsp;</span>
+      <span class="glyphicon glyphicon-trash pointer" aria-hidden="true"></span>
+    </td>
+    <td></td>
+  </tr>
+{%- endmacro %}
+
 {% block content %}
   <div>
     <ul class="nav nav-tabs" role="tablist" style="margin-bottom: 15px">
-      <li role="presentation" class="active">
-        <a href="#emails" aria-controls="emails" role="tab" data-toggle="tab">Emails Autorizados</a>
-      </li>
-      <li role="presentation">
-        <a href="#languages" aria-controls="languages" role="tab" data-toggle="tab">Idiomas</a>
-      </li>
-      <li role="presentation">
-        <a href="#modalities" aria-controls="modalities" role="tab" data-toggle="tab">Modalidades</a>
-      </li>
-      <li role="presentation">
-        <a href="#payments" aria-controls="payments" role="tab" data-toggle="tab">Formas de pagamento</a>
-      </li>
+      {{ create_tab("emails", "Emails Autorizados", True) }}
+      {{ create_tab("languages", "Idiomas") }}
+      {{ create_tab("modalities", "Modalidades") }}
+      {{ create_tab("payments", "Formas de pagamento") }}
     </ul>
     <div class="tab-content">
       <div role="tabpanel" class="tab-pane active" id="emails">
@@ -39,20 +49,12 @@
                 <tr>
                   <th>Email</th>
                   <th>Ações</th>
-                  <th>Status</th>
+                  <th style="color:gray">Status</th>
                 </tr>
               </thead>
               <tbody>
                 {% for id, email in emails %}
-                  <tr data-id="{{ id }}">
-                    <td>{{ email }}</td>
-                    <td>
-                      <span class="glyphicon glyphicon-pencil pointer" aria-hidden="true"></span>
-                      <span>&nbsp;&nbsp;&nbsp;</span>
-                      <span class="glyphicon glyphicon-trash pointer" aria-hidden="true"></span>
-                    </td>
-                    <td></td>
-                  </tr>
+                  {{ create_row(id, email) }}
                 {% endfor %}
                 <tr class="active">
                   <td class="plus-cell pointer" colspan=3 align="center">
@@ -68,6 +70,9 @@
       <div role="tabpanel" class="tab-pane" id="modalities">CCCCCCCCCCCCCCCCCCCC</div>
       <div role="tabpanel" class="tab-pane" id="payments">DDDDDDDDDDDDDDDDDD</div>
     </div>
+    <table hidden>
+      {{ create_row("new", "", True) }}
+    </table>
   </div>
 {% endblock %}
 
