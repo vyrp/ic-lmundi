@@ -4,6 +4,12 @@ import traceback
 from helpers import render
 
 
+def handler_400(request, response, exception):
+    logging.exception(exception)
+    response.write(exception.message)
+    response.set_status(400)
+
+
 def handler_404(request, response, exception):
     response.write(render("templates/404.html"))
     response.set_status(404)

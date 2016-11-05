@@ -21,5 +21,6 @@ app = webapp2.WSGIApplication([
 
 app.registry["settings_lock"] = threading.Lock()
 
-app.error_handlers[500] = errors.handler_500
+app.error_handlers[400] = errors.handler_400
 app.error_handlers[404] = errors.handler_404
+app.error_handlers[500] = errors.handler_500
