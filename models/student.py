@@ -1,3 +1,4 @@
+import statuses
 import re
 
 from google.appengine.ext import ndb
@@ -26,8 +27,30 @@ class Student(ndb.Model):
             return value
         raise ValueError("Year must be >= 1900.")
 
+    def strictly_positive(self, value):
+        if value > 0:
+            return value
+        raise ValueError("Index must be > 0.")
+
+    # Indexed because search
+    first_contact = ndb.DateProperty(validator=recent_date)
+    language_ids_interested = ndb.IntegerProperty(repeated=True, validator=strictly_positive)
+    status = ndb.IntegerProperty(choices=set(range(1, statuses.END)), default=0)
+
+    # Indexed because sort
     name = ndb.StringProperty(required=True, validator=non_empty)
-    surname = ndb.StringProperty(required=True, validator=non_empty)
-    first_contact = ndb.DateProperty(required=True, validator=recent_date)
-    telephone = ndb.StringProperty(required=True, validator=validate_telephone)
-    email = ndb.StringProperty(required=True, validator=non_empty)
+    surname = ndb.StringProperty(validator=non_empty)
+    email = ndb.StringProperty(validator=non_empty)
+
+    # Indexed because projection
+    telephones = ndb.StringProperty(repeated=True, validator=validate_telephone)  # required
+
+    # Not indexed
+    modality_ids_interested = ndb.IntegerProperty(
+        indexed=False, repeated=True, validator=strictly_positive)
+    made_lvl_test = ndb.BooleanProperty(default=False, indexed=False)
+    lvl = ndb.StringProperty(indexed=False)
+    turma = ndb.IntegerProperty(indexed=False, validator=strictly_positive)
+    available_times = ndb.StringProperty(indexed=False)
+    obs = ndb.TextProperty()
+    extra_info = ndb.TextProperty()
