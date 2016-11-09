@@ -1,4 +1,13 @@
 $(function(){
+    var email_regex = /^[-a-z0-9~!$%^&*_=+}{\'?]+(\.[-a-z0-9~!$%^&*_=+}{\'?]+)*@([a-z0-9_][-a-z0-9_]*(\.[-a-z0-9_]+)*\.(aero|arpa|biz|com|coop|edu|gov|info|int|mil|museum|name|net|org|pro|travel|mobi|[a-z][a-z])|([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}))(:[0-9]{1,5})?$/i;
+
+    $confModal = $("#confirmation-modal");
+    $deleteSureBtn = $("#delete-item-sure");
+
+    $confModal.on("hidden.bs.modal", function(){
+        $deleteSureBtn.off("click");
+    });
+
     function rotateForEver($elem, rotator) {
         if (rotator === void(0)) {
             rotator = $({deg: 0});
@@ -54,6 +63,13 @@ $(function(){
         };
     }
 
+    function isValid(newValue, category) {
+        if (category === "emails") {
+            return email_regex.test(newValue);
+        }
+        return true;
+    }
+
     function pencilClickHandler() {
         var $tr = $(this).parents("tr");
         var $valueCell = $tr.children().first();
@@ -78,7 +94,15 @@ $(function(){
         $input.keyup(function(event){
             switch (event.which) {
                 case 13: // Key: Enter
-                    var newValue = $input.val();
+                    var newValue = $input.val().trim();
+
+                    if (isValid(newValue, category)) {
+                        $valueCell.removeClass("has-error");
+                    } else {
+                        $valueCell.addClass("has-error");
+                        break;
+                    }
+
                     $valueCell.html(newValue);
 
                     var indicator = createIndicator($statusCell);
@@ -112,19 +136,26 @@ $(function(){
 
     function trashClickHandler() {
         var $tr = $(this).parents("tr");
-        var indicator = createIndicator($tr.children().last());
-        var category = $tr.parents(".tab-pane").get(0).id;
 
-        $.post({
-            url: "/ajax/" + category + "/remove",
-            data: {
-                id: $tr.data("id")
-            },
-            success: function(data, textStatus, jqXHR){
-                $tr.remove();
-            },
-            error: indicatorToRedCross(indicator)
+        $deleteSureBtn.click(function(){
+            var indicator = createIndicator($tr.children().last());
+            var category = $tr.parents(".tab-pane").get(0).id;
+
+            $.post({
+                url: "/ajax/" + category + "/remove",
+                data: {
+                    id: $tr.data("id")
+                },
+                success: function(data, textStatus, jqXHR){
+                    $tr.remove();
+                },
+                error: indicatorToRedCross(indicator)
+            });
+
+            $confModal.modal("hide");
         });
+
+        $confModal.modal("show");
     }
 
     function addHandler() {
