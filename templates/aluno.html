@@ -3,6 +3,17 @@
 
 {% block title %}Aluno{% endblock %}
 
+{% macro form_input(value, id, text, placeholder, validation="", required=False, extra="") -%}
+  <div class="form-group">
+    <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
+    <div class="col-sm-10">
+      <input type="text" class="form-control" id="{{ id }}" name="{{ id }}" placeholder="{{ placeholder }}"
+             {% if value %}value="{{ value }}"{% endif %}
+             data-validation="{{ validation }}" {{ extra }} {% if required %}required{% endif %}>
+    </div>
+  </div>
+{%- endmacro %}
+
 {% block content %}
   <div>
     <a href="/alunos" class="btn btn-default" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>&nbsp;&nbsp;Voltar para todos os alunos
@@ -12,41 +23,23 @@
 
   {% if show_form %}
   <form class="form-horizontal" action="/aluno/{{id}}" method="POST">
-    <div class="form-group">
-      <label for="name" class="col-sm-2 control-label">Nome*</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" id="name" name="name" placeholder="Nome" {% if student %}value="{{student.name}}"{% endif %}
-               data-validation="required" required>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="surname" class="col-sm-2 control-label">Sobrenome*</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" id="surname" name="surname" placeholder="Sobrenome" {% if student %}value="{{student.surname}}"{% endif %}
-               data-validation="required" required>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="first_contact" class="col-sm-2 control-label">Data do primeiro contato*</label>
-      <div class="col-sm-10">
-        <input type="text" class="form-control" id="first_contact" name="first_contact" placeholder="dd/mm/aaaa" {% if student %}value="{{student.first_contact.strftime('%d/%m/%Y')}}"{% endif %}
-               data-validation="date dategt1900" data-validation-format="dd/mm/yyyy" required>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="telephone" class="col-sm-2 control-label">Telefone*</label>
-      <div class="col-sm-10">
-        <input type="tel" class="form-control" id="telephone" name="telephone" placeholder="(61) 98888-7777" {% if student %}value="{{student.telephone}}"{% endif %}
-               data-validation="brphone" required>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="email" class="col-sm-2 control-label">Email*</label>
-      <div class="col-sm-10">
-        <input type="email" class="form-control" id="email" name="email" placeholder="alguem@email.com" {% if student %}value="{{student.email}}"{% endif %}
-               data-validation="email" required>
-      </div>
-    </div>
+    {{ form_input(student and student.name,            "name",            "Nome",                     "Nome",                "required",        required=True                              ) }}
+    {{ form_input(student and student.surname,         "surname",         "Sobrenome",                "Sobrenome"                                                                          ) }}
+    {{ form_input(student and student.telephones,      "telephones",      "Telefone",                 "(61) 98888-7777",     "brphone",         required=True                              ) }}
+    {{ form_input(student and student.email,           "email",           "Email",                    "alguem@email.com",    "email"                                                       ) }}
+    {{ form_input(student and student.languages,       "languages",       "Idiomas interessados",     "Alemão, inglês, ..."                                                                ) }}
+    {{ form_input(student and student.status,          "status",          "Status",                   "Interessado..."                                                                     ) }}
+    {{ form_input(student and student.first_contact,   "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy') }}
+    <hr>
+    {{ form_input(student and student.modalities,      "modalities",      "Modalidades",              "Aula regular..."                                                                    ) }}
+    {{ form_input(student and student.made_test,       "made_test",       "Fez teste de nivelamento", "Sim/Não"                                                                            ) }}
+    {{ form_input(student and student.available_times, "available_times", "Horários disponíveis",     "Terça e quinta à tarde..."                                                          ) }}
+    {{ form_input(student and student.obs,             "obs",             "Observações adicionais",   "Não gosta de jogos de azar..."                                                   ) }}
+    <hr>
+    {{ form_input(student and student.lvl,             "lvl",             "Nível",                    "Básico"                                                                             ) }}
+    {{ form_input(student and student.turma,           "turma",           "Turma",                    "IB01"                                                                               ) }}
+    {{ form_input(student and student.extra_info,      "extra_info",      "Informações matriculados", "RG, CPF, etc"                                                                       ) }}
+
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
         <button type="submit" class="btn btn-primary" name="edit">{% if student %} Atualizar {% else %} Criar {% endif %}</button>
@@ -83,7 +76,7 @@
   <script>
     $(function(){
       $("#first_contact").inputmask("99/99/9999");
-      $("#telephone").inputmask({
+      $("#telephones").inputmask({
         mask: "(99) 9999[9]-9999",
         onincomplete: function() {
           if (/\d_$/.test(this.value)) {

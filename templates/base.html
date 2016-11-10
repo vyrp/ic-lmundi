@@ -54,9 +54,7 @@
       $(function(){
         $messageDiv = $("#message-div");
         if ($messageDiv.length == 1) {
-          console.log("Timout set.");
           setTimeout(function(){
-            console.log("Timout fired.");
             $messageDiv.slideUp(300, function(){
               window.location.href = window.location.href.split("?")[0];
             });

@@ -1,4 +1,3 @@
-import datetime
 import logging
 import messages
 import urllib
@@ -55,18 +54,9 @@ class StudentHandler(webapp2.RequestHandler):
         try:
             r = self.request
 
-            first_contact = datetime.datetime.strptime(
-                r.get("first_contact"),
-                "%d/%m/%Y"
-            ).date()
-
-            student.populate(
-                name=r.get("name"),
-                surname=r.get("surname"),
-                first_contact=first_contact,
-                telephone=r.get("telephone"),
-                email=r.get("email"),
-            )
+            for key in r.arguments():
+                if r.get(key):
+                    student._values[key] = Student.adjust(key, r.get(key))
 
             student.put()
 

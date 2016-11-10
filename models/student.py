@@ -1,10 +1,19 @@
 import statuses
 import re
 
+from datetime import datetime
 from google.appengine.ext import ndb
 
 
 class Student(ndb.Model):
+    @classmethod
+    def adjust(cls, key, value):
+        if key == "first_contact":
+            return datetime.strptime(value, "%d/%m/%Y").date()
+        if key == "telephones":
+            return [value]
+        return value
+
     _telephone_regex = re.compile(r"\(\d{2}\) \d{4,5}\-\d{4}$")
 
     def validate_telephone(self, value):
@@ -34,11 +43,11 @@ class Student(ndb.Model):
 
     # Indexed because search
     first_contact = ndb.DateProperty(validator=recent_date)
-    language_ids_interested = ndb.IntegerProperty(repeated=True, validator=strictly_positive)
+    languages = ndb.IntegerProperty(repeated=True, validator=strictly_positive)
     status = ndb.IntegerProperty(choices=set(range(1, statuses.END)), default=0)
 
     # Indexed because sort
-    name = ndb.StringProperty(required=True, validator=non_empty)
+    name = ndb.StringProperty(required=True, validator=non_empty)  # required
     surname = ndb.StringProperty(validator=non_empty)
     email = ndb.StringProperty(validator=non_empty)
 
@@ -46,9 +55,9 @@ class Student(ndb.Model):
     telephones = ndb.StringProperty(repeated=True, validator=validate_telephone)  # required
 
     # Not indexed
-    modality_ids_interested = ndb.IntegerProperty(
+    modalities = ndb.IntegerProperty(
         indexed=False, repeated=True, validator=strictly_positive)
-    made_lvl_test = ndb.BooleanProperty(default=False, indexed=False)
+    made_test = ndb.BooleanProperty(default=False, indexed=False)
     lvl = ndb.StringProperty(indexed=False)
     turma = ndb.IntegerProperty(indexed=False, validator=strictly_positive)
     available_times = ndb.StringProperty(indexed=False)
