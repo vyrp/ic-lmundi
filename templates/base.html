@@ -55,9 +55,7 @@
         $messageDiv = $("#message-div");
         if ($messageDiv.length == 1) {
           setTimeout(function(){
-            $messageDiv.slideUp(300, function(){
-              window.location.href = window.location.href.split("?")[0];
-            });
+            $messageDiv.slideUp(300);
           }, 3500);
         }
       });

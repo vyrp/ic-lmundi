@@ -33,6 +33,11 @@ class StudentHandler(webapp2.RequestHandler):
 
     @secure
     def post(self, id):
+        r = self.request
+        logging.info(
+            "### Arguments:\n" +
+            "\n".join("%s => %s" % (arg, r.get_all(arg)) for arg in r.arguments()))
+
         if "edit" in self.request.arguments():
             self.create_or_edit_student(id)
         elif "delete" in self.request.arguments():
@@ -54,9 +59,13 @@ class StudentHandler(webapp2.RequestHandler):
         try:
             r = self.request
 
-            for key in r.arguments():
-                if r.get(key):
-                    student._values[key] = Student.adjust(key, r.get(key))
+            student.name = r.get("name")
+
+            telephones = filter(bool, r.get_all("telephones[]"))
+            if telephones:
+                student.telephones = telephones
+            else:
+                raise ValueError("There must be at least one telephone.")
 
             student.put()
 

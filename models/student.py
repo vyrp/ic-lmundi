@@ -44,7 +44,7 @@ class Student(ndb.Model):
     # Indexed because search
     first_contact = ndb.DateProperty(validator=recent_date)
     languages = ndb.IntegerProperty(repeated=True, validator=strictly_positive)
-    status = ndb.IntegerProperty(choices=set(range(1, statuses.END)), default=0)
+    status = ndb.IntegerProperty(choices=set(range(1, statuses.END)), default=1)
 
     # Indexed because sort
     name = ndb.StringProperty(required=True, validator=non_empty)  # required

@@ -3,14 +3,67 @@
 
 {% block title %}Aluno{% endblock %}
 
+{% block css %}
+  <style>
+    td:first-child { padding-right: 10px }
+    td { padding-bottom: 10px }
+    tr:last-child > td { padding-bottom: 0 }
+  </style>
+{% endblock %}
+
 {% macro form_input(value, id, text, placeholder, validation="", required=False, extra="") -%}
   <div class="form-group">
     <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="{{ id }}" name="{{ id }}" placeholder="{{ placeholder }}"
              {% if value %}value="{{ value }}"{% endif %}
-             data-validation="{{ validation }}" {{ extra }} {% if required %}required{% endif %}>
+             data-validation="{{ validation }}" {{ extra }} {% if required %} required {% else %} data-validation-optional="true" {% endif %}>
     </div>
+  </div>
+{%- endmacro %}
+
+{% macro form_dropdown(value, id, text, values) -%}
+  <div class="form-group">
+    <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
+    <div class="col-sm-10">
+      <select class="form-control" id="{{ id }}" name="{{ id }}">
+        {% for v in values %}
+          <option value="{{ loop.index }}" {% if value == loop.index %}selected{% endif %}>{{ v }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro form_multiple_inputs(values, id, text, placeholder, validation="", required=False) -%}
+  <div class="form-group">
+    <label for="{{ id }}[]" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
+      <div class="col-sm-10">
+        <table>
+          <tbody>
+            {% for value in values %}
+              <tr>
+                <td width="100%">
+                  <input type="text" class="form-control {{ id }}" name="{{ id }}[]" placeholder="{{ placeholder }}"
+                         value="{{ value }}" data-validation="{{ validation }}">
+                </td>
+                <td valign="top">
+                  <button type="button" class="btn btn-danger remove-item"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                </td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td width="100%">
+                <input type="text" class="form-control {{ id }}" name="{{ id }}[]" placeholder="{{ placeholder }}"
+                       data-validation="{{ validation }}" {% if values %} data-validation-optional="true" {% endif %}>
+              </td>
+              <td valign="top">
+                <button type="button" class="btn btn-success add-item"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
   </div>
 {%- endmacro %}
 
@@ -25,11 +78,11 @@
   <form class="form-horizontal" action="/aluno/{{id}}" method="POST">
     {{ form_input(student and student.name,            "name",            "Nome",                     "Nome",                "required",        required=True                              ) }}
     {{ form_input(student and student.surname,         "surname",         "Sobrenome",                "Sobrenome"                                                                          ) }}
-    {{ form_input(student and student.telephones,      "telephones",      "Telefone",                 "(61) 98888-7777",     "brphone",         required=True                              ) }}
+    {{ form_multiple_inputs(student and student.telephones,      "telephones",      "Telefones",                "(00) 00000-0000",     "brphone",         required=True                              ) }}
     {{ form_input(student and student.email,           "email",           "Email",                    "alguem@email.com",    "email"                                                       ) }}
-    {{ form_input(student and student.languages,       "languages",       "Idiomas interessados",     "Alemão, inglês, ..."                                                                ) }}
-    {{ form_input(student and student.status,          "status",          "Status",                   "Interessado..."                                                                     ) }}
-    {{ form_input(student and student.first_contact,   "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy') }}
+    {{ form_dropdown(student and student.languages,    "languages",       "Idiomas interessados",     ["Inglês", "Alemão", "Francês"]                                                      ) }}
+    {{ form_dropdown(student and student.status,       "status",          "Status",                   ["Interessado", "Matriculado"]                                                                                     ) }}
+    {{ form_input(student and student.first_contact and student.first_contact.strftime("%d/%m/%Y"),   "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy') }}
     <hr>
     {{ form_input(student and student.modalities,      "modalities",      "Modalidades",              "Aula regular..."                                                                    ) }}
     {{ form_input(student and student.made_test,       "made_test",       "Fez teste de nivelamento", "Sim/Não"                                                                            ) }}
@@ -75,8 +128,10 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
   <script>
     $(function(){
+      // Masks
       $("#first_contact").inputmask("99/99/9999");
-      $("#telephones").inputmask({
+
+      var telephoneMask = {
         mask: "(99) 9999[9]-9999",
         onincomplete: function() {
           if (/\d_$/.test(this.value)) {
@@ -85,8 +140,10 @@
             $(this).validate();
           }
         },
-      });
+      };
+      $(".telephones").inputmask(telephoneMask);
 
+      // Validations
       $.formUtils.addValidator({
         name : "dategt1900",
         validatorFunction : function(value, $el, config, language, $form) {
@@ -100,6 +157,56 @@
         modules: "date, brazil",
         lang: "pt"
       });
+
+      // Items buttons
+      function removeItem() {
+        var $this = $(this);
+        var children = $this.parents("tbody").children();
+        if (children.length == 2) {
+          var $lastInput = children.last().find("input");
+          $lastInput.attr("data-validation-optional", false);
+          $.validate($lastInput);
+        }
+
+        $this.parents("tr").remove();
+      }
+
+      function addItem() {
+        var $this = $(this);
+        var $currentRow = $this.parents("tr");
+        var $inputCell = $currentRow.children().eq(0);
+        var $input = $inputCell.children().eq(0);
+
+        if (!$input.val()) {
+          $inputCell.addClass("has-error");
+          return;
+        }
+
+        $input.validate(function(valid, elem){
+          if (valid) {
+            // Add new empty row
+            var $newRow = $currentRow.clone();
+            $this.parents("table").append($newRow);
+            $.validate($newRow.find("input").val("").attr("data-validation-optional", true));
+            $newRow.find(".add-item").click(addItem);
+            $newRow.find(".telephones").inputmask(telephoneMask);
+
+            // Modify current row
+            $input.attr("data-validation-optional", false);
+            $this
+              .removeClass("btn-success add-item")
+              .addClass("btn-danger remove-item")
+              .children()
+                .removeClass("glyphicon-plus")
+                .addClass("glyphicon-remove");
+            $this.off("click");
+            $this.click(removeItem);
+          }
+        });
+      }
+
+      $(".add-item").click(addItem);
+      $(".remove-item").click(removeItem);
     });
   </script>
 {% endblock %}

@@ -35,9 +35,9 @@
         {% for student in students %}
           <tr data-id="{{ student.key.id() }}">
             <td>{{ student.name }}</td>
-            <td>{{ student.surname }}</td>
-            <td>{{ student.first_contact.strftime('%d/%m/%Y') }}</td>
-            <td>{{ student.email }}</td>
+            <td>{{ student.surname or "-" }}</td>
+            <td>{{ student.first_contact and student.first_contact.strftime("%d/%m/%Y") or "-" }}</td>
+            <td>{{ student.email or "-" }}</td>
             <td>{{ student.telephone }}</td>
           </tr>
         {% endfor %}
