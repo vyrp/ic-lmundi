@@ -22,13 +22,13 @@
   </div>
 {%- endmacro %}
 
-{% macro form_dropdown(value, id, text, values) -%}
+{% macro form_dropdown(value, id, text, options) -%}
   <div class="form-group">
     <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
     <div class="col-sm-10">
       <select class="form-control" id="{{ id }}" name="{{ id }}">
-        {% for v in values %}
-          <option value="{{ loop.index }}" {% if value == loop.index %}selected{% endif %}>{{ v }}</option>
+        {% for opt in options %}
+          <option value="{{ loop.index }}" {% if value == loop.index %}selected{% endif %}>{{ opt }}</option>
         {% endfor %}
       </select>
     </div>
@@ -67,6 +67,44 @@
   </div>
 {%- endmacro %}
 
+{% macro form_multiple_dropdowns(values, id, text, options, required=False) -%}
+  <div class="form-group">
+    <label for="{{ id }}[]" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
+      <div class="col-sm-10">
+        <table>
+          <tbody>
+            {% for value in values %}
+              <tr>
+                <td width="100%">
+                  <select class="form-control {{ id }}" name="{{ id }}[]" data-validation="required">
+                    {% for opt in options %}
+                      <option value="{{ loop.index-1 if loop.index-1 > 0 else '' }}" {% if value == loop.index-1 %}selected{% endif %}>{{ opt }}</option>
+                    {% endfor %}
+                  </select>
+                </td>
+                <td valign="top">
+                  <button type="button" class="btn btn-danger remove-item"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+                </td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td width="100%">
+                <select class="form-control {{ id }}" name="{{ id }}[]" {% if values %} data-validation-optional="true" {% else %} data-validation="required" {% endif %}>
+                  {% for opt in options %}
+                    <option value="{{ loop.index-1 if loop.index-1 > 0 else '' }}">{{ opt }}</option>
+                  {% endfor %}
+                </select>
+              </td>
+              <td valign="top">
+                <button type="button" class="btn btn-success add-item"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+  </div>
+{%- endmacro %}
+
 {% block content %}
   <div>
     <a href="/alunos" class="btn btn-default" role="button"><span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span></a>&nbsp;&nbsp;Voltar para todos os alunos
@@ -76,22 +114,23 @@
 
   {% if show_form %}
   <form class="form-horizontal" action="/aluno/{{id}}" method="POST">
-    {{ form_input(student and student.name,            "name",            "Nome",                     "Nome",                "required",        required=True                              ) }}
-    {{ form_input(student and student.surname,         "surname",         "Sobrenome",                "Sobrenome"                                                                          ) }}
-    {{ form_multiple_inputs(student and student.telephones,      "telephones",      "Telefones",                "(00) 00000-0000",     "brphone",         required=True                              ) }}
-    {{ form_input(student and student.email,           "email",           "Email",                    "alguem@email.com",    "email"                                                       ) }}
-    {{ form_dropdown(student and student.languages,    "languages",       "Idiomas interessados",     ["Inglês", "Alemão", "Francês"]                                                      ) }}
-    {{ form_dropdown(student and student.status,       "status",          "Status",                   ["Interessado", "Matriculado"]                                                                                     ) }}
-    {{ form_input(student and student.first_contact and student.first_contact.strftime("%d/%m/%Y"),   "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy') }}
+    {{ form_input(             student and student.name,            "name",            "Nome",                     "Nome",                "required",        required=True                              ) }}
+    {{ form_input(             student and student.surname,         "surname",         "Sobrenome",                "Sobrenome"                                                                          ) }}
+    {{ form_multiple_inputs(   student and student.telephones,      "telephones",      "Telefones",                "(00) 00000-0000",     "brphone",         required=True                              ) }}
+    {{ form_input(             student and student.email,           "email",           "Email",                    "alguem@email.com",    "email"                                                       ) }}
+    {{ form_multiple_dropdowns(student and student.languages,       "languages",       "Idiomas interessados",     ["[Escolha um]", "Inglês", "Alemão", "Francês"],      True                                       ) }}
+    {{ form_dropdown(          student and student.status,          "status",          "Status",                   ["Interessado", "Matriculado"]                                                       ) }}
+    {{ form_input(             student and student.first_contact and student.first_contact.strftime("%d/%m/%Y"),
+                                                                    "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy'  ) }}
     <hr>
-    {{ form_input(student and student.modalities,      "modalities",      "Modalidades",              "Aula regular..."                                                                    ) }}
-    {{ form_input(student and student.made_test,       "made_test",       "Fez teste de nivelamento", "Sim/Não"                                                                            ) }}
-    {{ form_input(student and student.available_times, "available_times", "Horários disponíveis",     "Terça e quinta à tarde..."                                                          ) }}
-    {{ form_input(student and student.obs,             "obs",             "Observações adicionais",   "Não gosta de jogos de azar..."                                                   ) }}
+    {{ form_input(             student and student.modalities,      "modalities",      "Modalidades",              "Aula regular..."                                                                    ) }}
+    {{ form_input(             student and student.made_test,       "made_test",       "Fez teste de nivelamento", "Sim/Não"                                                                            ) }}
+    {{ form_input(             student and student.available_times, "available_times", "Horários disponíveis",     "Terça e quinta à tarde..."                                                          ) }}
+    {{ form_input(             student and student.obs,             "obs",             "Observações adicionais",   "Não gosta de jogos de azar..."                                                      ) }}
     <hr>
-    {{ form_input(student and student.lvl,             "lvl",             "Nível",                    "Básico"                                                                             ) }}
-    {{ form_input(student and student.turma,           "turma",           "Turma",                    "IB01"                                                                               ) }}
-    {{ form_input(student and student.extra_info,      "extra_info",      "Informações matriculados", "RG, CPF, etc"                                                                       ) }}
+    {{ form_input(             student and student.lvl,             "lvl",             "Nível",                    "Básico"                                                                             ) }}
+    {{ form_input(             student and student.turma,           "turma",           "Turma",                    "IB01"                                                                               ) }}
+    {{ form_input(             student and student.extra_info,      "extra_info",      "Informações matriculados", "RG, CPF, etc"                                                                       ) }}
 
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
@@ -163,7 +202,7 @@
         var $this = $(this);
         var children = $this.parents("tbody").children();
         if (children.length == 2) {
-          var $lastInput = children.last().find("input");
+          var $lastInput = children.last().children().eq(0).children().eq(0);
           $lastInput.attr("data-validation-optional", false);
           $.validate($lastInput);
         }
@@ -187,7 +226,7 @@
             // Add new empty row
             var $newRow = $currentRow.clone();
             $this.parents("table").append($newRow);
-            $.validate($newRow.find("input").val("").attr("data-validation-optional", true));
+            $.validate($newRow.children().eq(0).children().eq(0).val("").attr("data-validation-optional", true));
             $newRow.find(".add-item").click(addItem);
             $newRow.find(".telephones").inputmask(telephoneMask);
 

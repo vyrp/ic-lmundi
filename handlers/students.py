@@ -3,6 +3,7 @@ import messages
 import urllib
 import webapp2
 
+from datetime import datetime
 from helpers import active, get_m, render, secure, update_m
 from models.student import Student
 
@@ -60,12 +61,31 @@ class StudentHandler(webapp2.RequestHandler):
             r = self.request
 
             student.name = r.get("name")
+            if not student.name:
+                raise ValueError("Student name must be non-empty.")
+
+            student.surname = r.get("surname")
+            student.email = r.get("email")
+            student.status = int(r.get("status"))
+
+            first_contact = r.get("first_contact")
+            if first_contact:
+                student.first_contact = datetime.strptime(
+                    first_contact,
+                    "%d/%m/%Y"
+                ).date()
 
             telephones = filter(bool, r.get_all("telephones[]"))
             if telephones:
                 student.telephones = telephones
             else:
                 raise ValueError("There must be at least one telephone.")
+
+            languages = filter(bool, r.get_all("languages[]"))
+            if languages:
+                student.languages = map(int, languages)
+            else:
+                raise ValueError("There must be at least one language.")
 
             student.put()
 
