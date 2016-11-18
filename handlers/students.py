@@ -60,13 +60,23 @@ class StudentHandler(webapp2.RequestHandler):
         try:
             r = self.request
 
-            student.name = r.get("name")
-            if not student.name:
+            name = r.get("name")
+            if name:
+                student.name = name
+            else:
                 raise ValueError("Student name must be non-empty.")
 
-            student.surname = r.get("surname")
-            student.email = r.get("email")
-            student.status = int(r.get("status"))
+            surname = r.get("surname")
+            if surname:
+                student.surname = surname
+
+            email = r.get("email")
+            if email:
+                student.email = email
+
+            status = int(r.get("status"))
+            if status:
+                student.status = status
 
             first_contact = r.get("first_contact")
             if first_contact:
@@ -86,6 +96,8 @@ class StudentHandler(webapp2.RequestHandler):
                 student.languages = map(int, languages)
             else:
                 raise ValueError("There must be at least one language.")
+
+            student.modalities = map(int, filter(bool, r.get_all("modalities[]")))
 
             student.put()
 

@@ -90,7 +90,9 @@
             {% endfor %}
             <tr>
               <td width="100%">
-                <select class="form-control {{ id }}" name="{{ id }}[]" {% if values %} data-validation-optional="true" {% else %} data-validation="required" {% endif %}>
+                <select class="form-control {{ id }}" name="{{ id }}[]"
+                        {% if required %} data-validation="required" {% endif %}
+                        {% if values %} data-validation-optional="true" {% endif %}>
                   {% for opt in options %}
                     <option value="{{ loop.index-1 if loop.index-1 > 0 else '' }}">{{ opt }}</option>
                   {% endfor %}
@@ -119,15 +121,12 @@
     {{ form_input(             student and student.surname,         "surname",         "Sobrenome",                "Sobrenome"                                                                          ) }}
     {{ form_multiple_inputs(   student and student.telephones,      "telephones",      "Telefones",                "(00) 00000-0000",     "brphone",         required=True                              ) }}
     {{ form_input(             student and student.email,           "email",           "Email",                    "alguem@email.com",    "email"                                                       ) }}
-    {{ form_multiple_dropdowns(student and student.languages,       "languages",       "Idiomas interessados",     ["[Escolha um]", "Inglês", "Alemão", "Francês"],      True                                       ) }}
+    {{ form_multiple_dropdowns(student and student.languages,       "languages",       "Idiomas interessados",     ["[Escolha um]", "Inglês", "Alemão", "Francês"],      True                           ) }}
     {{ form_dropdown(          student and student.status,          "status",          "Status",                   ["Interessado", "Matriculado"]                                                       ) }}
     {{ form_input(             student and student.first_contact and student.first_contact.strftime("%d/%m/%Y"),
                                                                     "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy'  ) }}
-
-
-
     <hr>
-    {{ form_input(             student and student.modalities,      "modalities",      "Modalidades",              "Aula regular..."                                                                    ) }}
+    {{ form_multiple_dropdowns(student and student.modalities,      "modalities",      "Modalidades",              ["[Escolha um]", "Aula Privada", "Regular", "Cultura"]                               ) }}
     {{ form_input(             student and student.made_test,       "made_test",       "Fez teste de nivelamento", "Sim/Não"                                                                            ) }}
     {{ form_input(             student and student.available_times, "available_times", "Horários disponíveis",     "Terça e quinta à tarde..."                                                          ) }}
     {{ form_input(             student and student.obs,             "obs",             "Observações adicionais",   "Não gosta de jogos de azar..."                                                      ) }}
@@ -236,27 +235,35 @@
           return;
         }
 
-        $input.validate(function(valid, elem){
-          if (valid) {
-            // Add new empty row
-            var $newRow = $currentRow.clone();
-            $this.parents("table").append($newRow);
-            $.validate($newRow.children().eq(0).children().eq(0).val("").attr("data-validation-optional", true));
-            $newRow.find(".add-item").click(addItem);
-            $newRow.find(".telephones").inputmask(telephoneMask);
+        function onValid() {
+          // Add new empty row
+          var $newRow = $currentRow.clone();
+          $this.parents("table").append($newRow);
+          $.validate($newRow.children().eq(0).children().eq(0).val("").attr("data-validation-optional", true));
+          $newRow.find(".add-item").click(addItem);
+          $newRow.find(".telephones").inputmask(telephoneMask);
 
-            // Modify current row
-            $input.attr("data-validation-optional", false);
-            $this
-              .removeClass("btn-success add-item")
-              .addClass("btn-danger remove-item")
-              .children()
-                .removeClass("glyphicon-plus")
-                .addClass("glyphicon-remove");
-            $this.off("click");
-            $this.click(removeItem);
-          }
-        });
+          // Modify current row
+          $input.attr("data-validation-optional", false);
+          $this
+            .removeClass("btn-success add-item")
+            .addClass("btn-danger remove-item")
+            .children()
+              .removeClass("glyphicon-plus")
+              .addClass("glyphicon-remove");
+          $this.off("click");
+          $this.click(removeItem);
+        }
+
+        if ($input.get(0).hasAttribute("data-validation")) {
+          $input.validate(function(valid, elem){
+            if (valid) {
+              onValid();
+            }
+          });
+        } else {
+          onValid();
+        }
       }
 
       $(".add-item").click(addItem);
