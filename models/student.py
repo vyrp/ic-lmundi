@@ -63,3 +63,6 @@ class Student(ndb.Model):
     available_times = ndb.StringProperty(indexed=False)
     obs = ndb.TextProperty()
     extra_info = ndb.TextProperty()
+
+    def made_test_int(self):
+        return int(self.made_test)

@@ -12,13 +12,22 @@
   </style>
 {% endblock %}
 
-{% macro form_input(value, id, text, placeholder, validation="", required=False, extra="") -%}
-  <div class="form-group">
+{% macro form_input(value, id, text, placeholder, validation="", required=False, extra="", hidden=False) -%}
+  <div class="form-group" {% if hidden %}hidden{% endif %}>
     <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
     <div class="col-sm-10">
       <input type="text" class="form-control" id="{{ id }}" name="{{ id }}" placeholder="{{ placeholder }}"
              {% if value %}value="{{ value }}"{% endif %}
              data-validation="{{ validation }}" {{ extra }} {% if required %} required {% else %} data-validation-optional="true" {% endif %}>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro form_textarea(value, id, text, placeholder) -%}
+  <div class="form-group">
+    <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
+    <div class="col-sm-10">
+      <textarea class="form-control" id="{{ id }}" name="{{ id }}" placeholder="{{ placeholder }}" rows="3">{% if value %}{{ value }}{% endif %}</textarea>
     </div>
   </div>
 {%- endmacro %}
@@ -32,6 +41,19 @@
           <option value="{{ loop.index }}" {% if value == loop.index %}selected{% endif %}>{{ opt }}</option>
         {% endfor %}
       </select>
+    </div>
+  </div>
+{%- endmacro %}
+
+{% macro form_radio(value, id, text, options, required=False) -%}
+  <div class="form-group">
+    <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
+    <div class="col-sm-10">
+      {% for opt in options %}
+        <label class="radio-inline">
+          <input type="radio" name="{{ id }}" id="{{ id }}{{loop.index-1}}" value="{{ loop.index-1 }}" {% if value == loop.index-1 %}checked{% endif %}> {{ opt }}
+        </label>
+      {% endfor %}
     </div>
   </div>
 {%- endmacro %}
@@ -127,11 +149,11 @@
                                                                     "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy'  ) }}
     <hr>
     {{ form_multiple_dropdowns(student and student.modalities,      "modalities",      "Modalidades",              ["[Escolha um]", "Aula Privada", "Regular", "Cultura"]                               ) }}
-    {{ form_input(             student and student.made_test,       "made_test",       "Fez teste de nivelamento", "Sim/Não"                                                                            ) }}
-    {{ form_input(             student and student.available_times, "available_times", "Horários disponíveis",     "Terça e quinta à tarde..."                                                          ) }}
-    {{ form_input(             student and student.obs,             "obs",             "Observações adicionais",   "Não gosta de jogos de azar..."                                                      ) }}
+    {{ form_input(             student and student.available_times, "available_times", "Horários disponíveis",     "Dias e períodos livres do aluno..."                                                 ) }}
+    {{ form_textarea(          student and student.obs,             "obs",             "Observações adicionais",   "Mais informações úteis sobre o aluno..."                                            ) }}
+    {{ form_radio(             student and student.made_test_int(), "made_test",       "Fez teste de nivelamento", ["Não", "Sim"]                                                                       ) }}
+    {{ form_input(             student and student.lvl,             "lvl",             "Nível",                    "Básico",               hidden=(not student or not student.made_test)                ) }}
     <hr>
-    {{ form_input(             student and student.lvl,             "lvl",             "Nível",                    "Básico"                                                                             ) }}
     {{ form_input(             student and student.turma,           "turma",           "Turma",                    "IB01"                                                                               ) }}
     {{ form_input(             student and student.extra_info,      "extra_info",      "Informações matriculados", "RG, CPF, etc"                                                                       ) }}
 
@@ -268,6 +290,24 @@
 
       $(".add-item").click(addItem);
       $(".remove-item").click(removeItem);
+
+      // Custom logic
+
+      var $lvlField = $("#lvl");
+      var $lvlRow = $lvlField.parents(".form-group");
+      function hideOrShowLvlField(should_show) {
+        return function() {
+          if (should_show) {
+            $lvlRow.show();
+          } else {
+            $lvlRow.hide();
+            $lvlField.val("");
+          }
+        };
+      }
+
+      $("#made_test0").click(hideOrShowLvlField(false));
+      $("#made_test1").click(hideOrShowLvlField(true));
     });
   </script>
 {% endblock %}

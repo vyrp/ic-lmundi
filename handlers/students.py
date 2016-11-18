@@ -99,6 +99,14 @@ class StudentHandler(webapp2.RequestHandler):
 
             student.modalities = map(int, filter(bool, r.get_all("modalities[]")))
 
+            made_test = r.get("made_test")
+            if made_test:
+                student.made_test = bool(int(made_test))
+
+            student.obs = r.get("obs")
+
+            student.lvl = r.get("lvl")
+
             student.put()
 
             m = messages.STUDENT_UPDATE_SUCCESS if id else messages.STUDENT_CREATE_SUCCESS
