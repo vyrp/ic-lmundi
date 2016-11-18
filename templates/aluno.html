@@ -4,6 +4,7 @@
 {% block title %}Aluno{% endblock %}
 
 {% block css %}
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/css/bootstrap-datepicker3.min.css" rel="stylesheet">
   <style>
     td:first-child { padding-right: 10px }
     td { padding-bottom: 10px }
@@ -122,6 +123,9 @@
     {{ form_dropdown(          student and student.status,          "status",          "Status",                   ["Interessado", "Matriculado"]                                                       ) }}
     {{ form_input(             student and student.first_contact and student.first_contact.strftime("%d/%m/%Y"),
                                                                     "first_contact",   "Data do primeiro contato", "dd/mm/aaaa",          "date dategt1900", extra='data-validation-format=dd/mm/yyyy'  ) }}
+
+
+
     <hr>
     {{ form_input(             student and student.modalities,      "modalities",      "Modalidades",              "Aula regular..."                                                                    ) }}
     {{ form_input(             student and student.made_test,       "made_test",       "Fez teste de nivelamento", "Sim/Não"                                                                            ) }}
@@ -164,7 +168,9 @@
 
 {% block js %}
   <script src="https://rawgit.com/RobinHerbots/Inputmask/3.x/dist/jquery.inputmask.bundle.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-form-validator/2.3.26/jquery.form-validator.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/locales/bootstrap-datepicker.pt-BR.min.js"></script>
   <script>
     $(function(){
       // Masks
@@ -195,6 +201,15 @@
       $.validate({
         modules: "date, brazil",
         lang: "pt"
+      });
+
+      // Date picker
+      $('#first_contact').datepicker({
+        forceParse: false,
+        format: "dd/mm/yyyy",
+        language: "pt-BR",
+        startDate: "01/01/1900",
+        todayBtn: "linked"
       });
 
       // Items buttons
