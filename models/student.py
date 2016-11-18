@@ -1,6 +1,8 @@
+import json
 import statuses
 import re
 
+from collections import defaultdict
 from datetime import datetime
 from google.appengine.ext import ndb
 
@@ -16,6 +18,7 @@ class Student(ndb.Model):
 
     _telephone_regex = re.compile(r"\(\d{2}\) \d{4,5}\-\d{4}$")
 
+    # TODO: move these functions outside class?
     def validate_telephone(self, value):
         value = value.strip()
         if Student._telephone_regex.match(value):
@@ -62,7 +65,13 @@ class Student(ndb.Model):
     turma = ndb.IntegerProperty(indexed=False, validator=strictly_positive)
     available_times = ndb.StringProperty(indexed=False)
     obs = ndb.TextProperty()
-    extra_info = ndb.TextProperty()
+    extra_info = ndb.TextProperty(default="{}")
 
     def made_test_int(self):
         return int(self.made_test)
+
+    def get_extra(self, key):
+        # TODO: use hooks?
+        if not hasattr(self, "extra_dict"):
+            self.extra_dict = defaultdict(str, json.loads(self.extra_info))
+        return self.extra_dict[key]

@@ -1,3 +1,4 @@
+import json
 import logging
 import messages
 import urllib
@@ -60,6 +61,7 @@ class StudentHandler(webapp2.RequestHandler):
         try:
             r = self.request
 
+            # Improve code reuse
             name = r.get("name")
             if name:
                 student.name = name
@@ -106,6 +108,18 @@ class StudentHandler(webapp2.RequestHandler):
             student.obs = r.get("obs")
 
             student.lvl = r.get("lvl")
+
+            # TODO: do some validation?
+            student.extra_info = json.dumps({
+                "RG": r.get("RG"),
+                "CPF": r.get("CPF"),
+                "address": r.get("address"),
+                "CEP": r.get("CEP"),
+                "birthdate": r.get("birthdate"),
+                "civil": r.get("civil"),
+                "profession": r.get("profession"),
+                "place": r.get("place")
+            })
 
             student.put()
 

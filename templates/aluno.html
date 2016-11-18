@@ -12,6 +12,8 @@
   </style>
 {% endblock %}
 
+<!--TODO: improve code reuse of these macros-->
+
 {% macro form_input(value, id, text, placeholder, validation="", required=False, extra="", hidden=False) -%}
   <div class="form-group" {% if hidden %}hidden{% endif %}>
     <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
@@ -32,7 +34,7 @@
   </div>
 {%- endmacro %}
 
-{% macro form_dropdown(value, id, text, options) -%}
+{% macro form_dropdown(value, id, text, options, required=False) -%}
   <div class="form-group">
     <label for="{{ id }}" class="col-sm-2 control-label">{{ text }}{% if required %}*{% endif %}</label>
     <div class="col-sm-10">
@@ -153,9 +155,31 @@
     {{ form_textarea(          student and student.obs,             "obs",             "Observações adicionais",   "Mais informações úteis sobre o aluno..."                                            ) }}
     {{ form_radio(             student and student.made_test_int(), "made_test",       "Fez teste de nivelamento", ["Não", "Sim"]                                                                       ) }}
     {{ form_input(             student and student.lvl,             "lvl",             "Nível",                    "Básico",               hidden=(not student or not student.made_test)                ) }}
+
     <hr>
-    {{ form_input(             student and student.turma,           "turma",           "Turma",                    "IB01"                                                                               ) }}
-    {{ form_input(             student and student.extra_info,      "extra_info",      "Informações matriculados", "RG, CPF, etc"                                                                       ) }}
+
+    <div class="form-group">
+      <label class="col-sm-2  control-label">Mais info</label>
+      <div class="col-sm-10">
+        <button type="button" class="btn btn-default" id="more-info-btn"><span class="glyphicon glyphicon-plus" aria-hidden="true"></span></button>
+      </div>
+    </div>
+    <div id="more-info-container" style="display: none;">
+      {% set civil_states = ["[Escolha um]", "Solteiro(a)", "Casado(a)", "Divorciado(a)", "Viúvo(a)", "Separado(a)", "Companheiro(a)"] %}
+
+      <!--{{ form_input(           student and student.turma,           "turma",           "Turma",                    "IB01"                                                                               ) }}-->
+      <!--TODO: add masks and validators-->
+      {{ form_input(           student and student.get_extra("RG"),            "RG",              "RG",                       "0.000.000-0"                                                                        ) }}
+      {{ form_input(           student and student.get_extra("CPF"),           "CPF",             "CPF",                      "000.000.000-00"                                                                     ) }}
+      {{ form_input(           student and student.get_extra("address"),       "address",         "Endereço",                 "Rua..."                                                                             ) }}
+      {{ form_input(           student and student.get_extra("CEP"),           "CEP",             "CEP",                      "00.000-000"                                                                         ) }}
+      {{ form_input(           student and student.get_extra("birthdate"),     "birthdate",       "Data de nascimento",       "dd/mm/aaaa"                                                                         ) }}
+      {{ form_dropdown(        student and student.get_extra("civil"),         "civil",           "Estado civil",             civil_states                                                                         ) }}
+      {{ form_input(           student and student.get_extra("profession"),    "profession",      "Profissão",                "Profissão"                                                                          ) }}
+      {{ form_input(           student and student.get_extra("place"),         "place",           "Local de trabalho/estudo", "Ministério x..."                                                                    ) }}
+    </div>
+
+    <hr>
 
     <div class="form-group">
       <div class="col-sm-offset-2 col-sm-10">
@@ -193,6 +217,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/js/bootstrap-datepicker.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.6.4/locales/bootstrap-datepicker.pt-BR.min.js"></script>
   <script>
+    // TODO: move to own .js file
+
     $(function(){
       // Masks
       $("#first_contact").inputmask("99/99/9999");
@@ -291,8 +317,9 @@
       $(".add-item").click(addItem);
       $(".remove-item").click(removeItem);
 
-      // Custom logic
+      /** Custom logic **/
 
+      // Level
       var $lvlField = $("#lvl");
       var $lvlRow = $lvlField.parents(".form-group");
       function hideOrShowLvlField(should_show) {
@@ -308,6 +335,25 @@
 
       $("#made_test0").click(hideOrShowLvlField(false));
       $("#made_test1").click(hideOrShowLvlField(true));
+
+      // More info
+      var open = false;
+      var $moreInfoContainer = $("#more-info-container");
+      $("#more-info-btn").click(function(){
+        if (open) {
+          open = false;
+          $(this).children().removeClass("glyphicon-minus").addClass("glyphicon-plus");
+          $moreInfoContainer.slideUp(200);
+        } else {
+          open = true;
+          $(this).children().removeClass("glyphicon-plus").addClass("glyphicon-minus");
+          $moreInfoContainer.slideDown(200, function(){
+            $('html, body').animate({
+                scrollTop: $moreInfoContainer.offset().top
+            }, 700);
+          });
+        }
+      });
     });
   </script>
 {% endblock %}
